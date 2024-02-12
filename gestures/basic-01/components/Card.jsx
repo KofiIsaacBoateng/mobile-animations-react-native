@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { GestureDetector, Gesture } from 'react-native-gesture-handler'
 import Animated, { useSharedValue, withSpring, useAnimatedStyle } from 'react-native-reanimated'
 import {mix, mixColor} from "react-native-redash"
@@ -17,28 +17,31 @@ const styles = StyleSheet.create({
     }
 })
 
-const Card  = ({position, name, index, backgroundColor, cards, setCard}) => {
+const Card  = ({position, name, index, backgroundColor, cards, setCards}) => {
     const offset = useSharedValue({x: 0, y: 0})
     const start = useSharedValue({x: 0, y: 0})
     const scale = mix(position, 1, 0.94)
     const translateY = mix(position, 0, -10)
 
-    const gesture = Gesture.Pan()
-    .onBegin((_e) => {
+    const gesture = useMemo(() =>(
+        Gesture.Pan()
+            .onBegin((_e) => {
 
-    })
-    .onUpdate((_e) => {
-        offset.value = {
-            x: _e.translationX + start.value.x,
-            y: _e.translationY + start.value.y
-        }
-    })
-    .onFinalize((_e) => {
-        offset.value = {
-            x: start.value.x,
-            y: start.value.y
-        }
-    })
+            })
+            .onUpdate((_e) => {
+                offset.value = {
+                    x: _e.translationX + start.value.x,
+                    y: _e.translationY + start.value.y
+                }
+            })
+            .onEnd((_e) => {
+                offset.value = {
+                    x: start.value.x,
+                    y: start.value.y
+                }
+
+            })
+    ), [cards])
 
     const animatedStyles = useAnimatedStyle(() => ({
         transform: [

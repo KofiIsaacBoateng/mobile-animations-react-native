@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import {NavigationContainer} from "@react-navigation/native"
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import {createDrawerNavigator} from "@react-navigation/drawer"
 import DrawerContent from './components/DrawerContent'
-import PanGesture from './gestures/PanGesture'
-import TapGesture from './gestures/TapGesture'
-import PanTap from './gestures/PanTap'
-import ScrollGestures from './gestures/ScrollGestures'
-import Status from './gestures/Status'
-import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import PanGesture from './screens/PanGesture'
+import TapGesture from './screens/TapGesture'
+import PanTap from './screens/PanTap'
+import ScrollGestures from './screens/ScrollGestures'
+import Status from './screens/Status'
 
 const Drawer = createDrawerNavigator()
 

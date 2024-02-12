@@ -3,8 +3,8 @@ import React from 'react'
 
 const PanTap = () => {
   return (
-    <View>
-      <Text>PanTap</Text>
+    <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
+      <Text style={{fontSize: 45, color: "#0c0d3466", fontWeight: "900"}}>PanTap</Text>
     </View>
   )
 }

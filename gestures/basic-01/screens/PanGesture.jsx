@@ -43,7 +43,7 @@ const PanGesture = () => {
             name={card.name}
             backgroundColor={card.background}
             cards={cards}
-            setCard={setCards}
+            setCards={setCards}
           />
         ))}
     </View>
