@@ -57,14 +57,14 @@ const NavigationElements = ({navigation}) => {
         label={"Status"}
         icon={<MaterialIcons name="tap-and-play" color="#fff" size={24} />}
         iconBackground={"purple"}
-        onPress={() => navigation.navigate("PanTap")}
+        onPress={() => navigation.navigate("Status")}
       />
 
       <NavElement 
         label={"Scroll Gestures"}
         icon={<MaterialIcons name="tap-and-play" color="#fff" size={24} />}
         iconBackground={"#0c0d34"}
-        onPress={() => navigation.navigate("PanTap")}
+        onPress={() => navigation.navigate("ScrollGestures")}
       />
 
     </View>

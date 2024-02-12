@@ -6,6 +6,8 @@ import DrawerContent from './components/DrawerContent'
 import PanGesture from './gestures/PanGesture'
 import TapGesture from './gestures/TapGesture'
 import PanTap from './gestures/PanTap'
+import ScrollGestures from './gestures/ScrollGestures'
+import Status from './gestures/Status'
 
 const Drawer = createDrawerNavigator()
 
@@ -22,6 +24,8 @@ const App = () => {
         <Drawer.Screen name="PanGesture" component={PanGesture} />
         <Drawer.Screen name="TapGesture" component={TapGesture} />
         <Drawer.Screen name="PanTap" component={PanTap} />
+        <Drawer.Screen name="Status" component={Status} />
+        <Drawer.Screen name="ScrollGestures" component={ScrollGestures} />
       </Drawer.Navigator>
     </NavigationContainer>
   )
