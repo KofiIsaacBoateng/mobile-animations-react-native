@@ -40,13 +40,13 @@ const Card  = ({position, name, backgroundColor, activeState, horizontalGestures
         .onStart(() => {
             console.log("flung up")
             displayDetails.value = true
-        }).blocksExternalGesture(horizontalGestures)
+        }).requireExternalGestureToFail(horizontalGestures)
 
     const flingDown = Gesture.Fling().direction(Directions.DOWN)
         .onStart(() => {
             console.log("Flung down")
             displayDetails.value = false
-        }).blocksExternalGesture(horizontalGestures)
+        }).requireExternalGestureToFail(horizontalGestures)
 
     const verticalGestures = Gesture.Exclusive(flingUp, flingDown)
 
