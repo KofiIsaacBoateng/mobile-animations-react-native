@@ -47,31 +47,39 @@ const Card  = ({position, name, backgroundColor, activeState, horizontalGestures
 
     const cardAnimatedStyles = useAnimatedStyle(() =>( {
         transform: [
-            {translateY: displayDetails.value === false ? interpolate(
-                    activeState.value,
-                    [position - 1, position],
-                    [-10, 0],
-                ) : withSpring(- height / 10)
+            {translateY: withSpring(
+                    displayDetails.value === false ? interpolate(
+                        activeState.value,
+                        [position - 1, position],
+                        [-10, 0],
+                    ) : - height / 10
+                ) 
             },
-            {translateX: displayDetails.value === false? interpolate(
+            {translateX: withSpring(
+                displayDetails.value === false? interpolate(
                     activeState.value,
                     [position, position + 1],
                     [0, width + width / 2],
                     {extrapolateLeft: Extrapolation.CLAMP}
-                ): withSpring(0)
+                ): 0
+            )
             },
-            {scaleX: displayDetails.value === false ? interpolate(
+            {scaleX: withSpring(
+                displayDetails.value === false ? interpolate(
                     activeState.value,
                     [position - 1, position, position + 1],
                     [0.95 , 1, 0]
-                ): withSpring(1.05)
+                ): 1.05
+            )
             },
 
-            {scaleY: displayDetails.value === false? interpolate(
+            {scaleY: withSpring(
+                displayDetails.value === false? interpolate(
                     activeState.value,
                     [position - 1, position, position + 1],
                     [1 , 1, 0]
-                ): withSpring(1.05)
+                ): 1.05
+            )
             }
         ]
     })) 
