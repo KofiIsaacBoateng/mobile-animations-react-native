@@ -1,7 +1,8 @@
-import { Dimensions, StyleSheet, Text, View } from 'react-native'
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, { Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated'
-
+import Entypo from 'react-native-vector-icons/Entypo'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 
 const {width, height} = Dimensions.get("window")
 const styles = StyleSheet.create({
@@ -23,7 +24,11 @@ const styles = StyleSheet.create({
         height: 80,
         backgroundColor: "#00000089",
         borderRadius: 5,
-        zIndex: 0
+        zIndex: 0,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: 50
     }
 })
 
@@ -35,13 +40,13 @@ const Card  = ({position, name, backgroundColor, activeState, horizontalGestures
         .onStart(() => {
             console.log("flung up")
             displayDetails.value = true
-        }).requireExternalGestureToFail(horizontalGestures)
+        }).blocksExternalGesture(horizontalGestures)
 
     const flingDown = Gesture.Fling().direction(Directions.DOWN)
         .onStart(() => {
             console.log("Flung down")
             displayDetails.value = false
-        }).requireExternalGestureToFail(horizontalGestures)
+        }).blocksExternalGesture(horizontalGestures)
 
     const verticalGestures = Gesture.Exclusive(flingUp, flingDown)
 
@@ -59,8 +64,11 @@ const Card  = ({position, name, backgroundColor, activeState, horizontalGestures
                 displayDetails.value === false? interpolate(
                     activeState.value,
                     [position, position + 1],
-                    [0, width + width / 2],
-                    {extrapolateLeft: Extrapolation.CLAMP}
+                    [ 0, width ],
+                    {
+                        extrapolateLeft: Extrapolation.CLAMP,
+                        extrapolateRight: Extrapolation.EXTEND
+                    },
                 ): 0
             )
             },
@@ -103,7 +111,17 @@ const Card  = ({position, name, backgroundColor, activeState, horizontalGestures
                 <Text style={{fontSize: 42, color: "#fff", fontWeight: "bold", textTransform: "uppercase"}}>{name}</Text>
             </View>
         </GestureDetector>
-        <Animated.View style={[styles.details, detailsAnimatedStyles]} />
+        <Animated.View style={[styles.details, detailsAnimatedStyles]}>
+            <TouchableOpacity onPress={() => null}>
+                <Entypo name="arrow-long-left" size={25} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => null}>
+                <FontAwesome5 name="expand-arrows-alt" size={25} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => null}>
+                <Entypo name="arrow-long-right" size={25} color="#fff" />
+            </TouchableOpacity>
+        </Animated.View>
     </Animated.View>
   )
 }

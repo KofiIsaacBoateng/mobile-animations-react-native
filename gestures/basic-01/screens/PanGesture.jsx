@@ -51,16 +51,16 @@ const PanGesture = () => {
 
   const flingLeftGesture = Gesture.Fling().direction(Directions.LEFT)
       .onStart(() => {
-        if(activeState.value < 1) return
-        activeState.value = (withSpring(activeState.value - 1))
-        console.log("Fling left in action")
+        if(activeState.value <= 0) return
+        activeState.value = withSpring(activeState.value - 1)
+        console.log(`Flung left: ${activeState.value}`)
       })
 
   const flingRightGesture = Gesture.Fling().direction(Directions.RIGHT)
       .onStart(() => {
         if (activeState.value >= cards.length - 1) return
-        activeState.value = (withSpring(activeState.value + 1))
-        console.log("Fling right in action")
+        activeState.value = withSpring(activeState.value + 1)
+        console.log(`Flung right: ${activeState.value}`)
       })
 
  
