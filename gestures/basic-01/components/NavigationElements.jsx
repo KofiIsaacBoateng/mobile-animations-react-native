@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Dimensions } from 'react-native'
 import React from 'react'
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
 import MaterialIcons from "react-native-vector-icons/MaterialIcons"
+import Octicons from "react-native-vector-icons/Octicons"
 import { TouchableOpacity } from 'react-native-gesture-handler'
 
 const {width} = Dimensions.get("window")
@@ -33,10 +34,10 @@ const NavigationElements = ({navigation}) => {
   return (
     <View style={{flex: 1, gap: 25, marginTop: 40, width: "100%", paddingHorizontal: 15}}>
       <NavElement 
-        label={"PanGesture"}
-        icon={<MaterialCommunityIcons name="drag-variant" color="#fff" size={24} />}
+        label={"Stacked Cards"}
+        icon={<Octicons name="stack" color="#fff" size={24} />}
         iconBackground={"#cc1800e7"}
-        onPress={() => navigation.navigate("PanGesture")}
+        onPress={() => navigation.navigate("StackedCards")}
       />
 
       <NavElement 
@@ -55,14 +56,14 @@ const NavigationElements = ({navigation}) => {
 
       <NavElement 
         label={"Status"}
-        icon={<MaterialIcons name="tap-and-play" color="#fff" size={24} />}
+        icon={<MaterialIcons name="tips-and-updates" color="#fff" size={24} />}
         iconBackground={"purple"}
         onPress={() => navigation.navigate("Status")}
       />
 
       <NavElement 
         label={"Scroll Gestures"}
-        icon={<MaterialIcons name="tap-and-play" color="#fff" size={24} />}
+        icon={<MaterialCommunityIcons name="drag-variant" color="#fff" size={24} />}
         iconBackground={"#0c0d34"}
         onPress={() => navigation.navigate("ScrollGestures")}
       />

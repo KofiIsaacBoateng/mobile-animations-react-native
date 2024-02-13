@@ -67,7 +67,6 @@ const Card  = ({position, name, backgroundColor, activeState, horizontalGestures
                     [ 0, width ],
                     {
                         extrapolateLeft: Extrapolation.CLAMP,
-                        extrapolateRight: Extrapolation.EXTEND
                     },
                 ): 0
             )

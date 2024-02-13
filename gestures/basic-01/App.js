@@ -4,7 +4,7 @@ import {NavigationContainer} from "@react-navigation/native"
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import {createDrawerNavigator} from "@react-navigation/drawer"
 import DrawerContent from './components/DrawerContent'
-import PanGesture from './screens/PanGesture'
+import StackedCards from './screens/StackedCards'
 import TapGesture from './screens/TapGesture'
 import PanTap from './screens/PanTap'
 import ScrollGestures from './screens/ScrollGestures'
@@ -17,13 +17,13 @@ const App = () => {
     <NavigationContainer>
         <GestureHandlerRootView style={{flex: 1}}>
         <Drawer.Navigator
-          initialRouteName='PanGestures'
+          initialRouteName='StackedCards'
           drawerContent={DrawerContent}
           screenOptions={{
             header: () => null
           }}
         >
-          <Drawer.Screen name="PanGesture" component={PanGesture} />
+          <Drawer.Screen name="StackedCards" component={StackedCards} />
           <Drawer.Screen name="TapGesture" component={TapGesture} />
           <Drawer.Screen name="PanTap" component={PanTap} />
           <Drawer.Screen name="Status" component={Status} />
