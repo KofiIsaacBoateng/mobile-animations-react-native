@@ -1,8 +1,6 @@
 import { Dimensions, StyleSheet, Text, View } from 'react-native'
-import React, { useMemo } from 'react'
-import { GestureDetector, Gesture } from 'react-native-gesture-handler'
-import Animated, { useSharedValue, withSpring, useAnimatedStyle } from 'react-native-reanimated'
-import {mix, mixColor} from "react-native-redash"
+import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-native-reanimated'
+import { mix } from 'react-native-redash'
 
 
 const {width, height} = Dimensions.get("window")
@@ -17,48 +15,41 @@ const styles = StyleSheet.create({
     }
 })
 
-const Card  = ({position, name, index, backgroundColor, cards, setCards}) => {
-    const offset = useSharedValue({x: 0, y: 0})
-    const start = useSharedValue({x: 0, y: 0})
-    const scale = mix(position, 1, 0.94)
-    const translateY = mix(position, 0, -10)
-
-    const gesture = useMemo(() =>(
-        Gesture.Pan()
-            .onBegin((_e) => {
-
-            })
-            .onUpdate((_e) => {
-                offset.value = {
-                    x: _e.translationX + start.value.x,
-                    y: _e.translationY + start.value.y
-                }
-            })
-            .onEnd((_e) => {
-                offset.value = {
-                    x: start.value.x,
-                    y: start.value.y
-                }
-
-            })
-    ), [cards])
-
-    const animatedStyles = useAnimatedStyle(() => ({
+const Card  = ({position, name, backgroundColor, activeState, cardsLength}) => {
+    const scaleX = mix(position, 1, 0.94)
+    console.log(position)
+    const animatedStyles = useAnimatedStyle(() =>( {
         transform: [
-            {translateX: withSpring(offset.value.x)},
-            {translateY: withSpring(offset.value.y + translateY)},
-            {scaleX: withSpring(scale)}
+            {translateY: interpolate(
+                activeState.value,
+                [position - 1, position],
+                [-10, 0],
+                // {extrapolateRight: }
+            )},
+            {translateX: interpolate(
+                activeState.value,
+                [position, position + 1],
+                [0, width + width / 2],
+                {extrapolateLeft: Extrapolation.CLAMP}
+            )},
+            {scaleX: interpolate(
+                activeState.value,
+                [position - 1, position, position + 1],
+                [0.95 , 1, 0]
+            )},
+
+            {scaleY: interpolate(
+                activeState.value,
+                [position - 1, position, position + 1],
+                [1 , 1, 0]
+            )}
         ]
-    }))
-
-
-
+    })) 
+    
   return (
-    <GestureDetector gesture={gesture}>
-        <Animated.View style={[styles.card, {backgroundColor}, animatedStyles ]}>
-            <Text style={{fontSize: 42, color: "#fff", fontWeight: "bold", textTransform: "uppercase"}}>{name}</Text>
-        </Animated.View>
-    </GestureDetector>
+    <Animated.View style={[styles.card, {backgroundColor}, animatedStyles]}>
+        <Text style={{fontSize: 42, color: "#fff", fontWeight: "bold", textTransform: "uppercase"}}>{name}</Text>
+    </Animated.View>
   )
 }
 
