@@ -1,6 +1,6 @@
 import { Dimensions, StyleSheet, Text, View } from 'react-native'
-import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-native-reanimated'
-import { mix } from 'react-native-redash'
+import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler'
+import Animated, { Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated'
 
 
 const {width, height} = Dimensions.get("window")
@@ -11,44 +11,91 @@ const styles = StyleSheet.create({
         position: "absolute",
         borderRadius: 30,
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        zIndex: 1,
+    },
+
+    details: {
+        position: "absolute",
+        bottom: 80,
+        left: 0,
+        right: 0,
+        height: 80,
+        backgroundColor: "#00000089",
+        borderRadius: 5,
+        zIndex: 0
     }
 })
 
-const Card  = ({position, name, backgroundColor, activeState, cardsLength}) => {
-    const scaleX = mix(position, 1, 0.94)
-    console.log(position)
-    const animatedStyles = useAnimatedStyle(() =>( {
-        transform: [
-            {translateY: interpolate(
-                activeState.value,
-                [position - 1, position],
-                [-10, 0],
-                // {extrapolateRight: }
-            )},
-            {translateX: interpolate(
-                activeState.value,
-                [position, position + 1],
-                [0, width + width / 2],
-                {extrapolateLeft: Extrapolation.CLAMP}
-            )},
-            {scaleX: interpolate(
-                activeState.value,
-                [position - 1, position, position + 1],
-                [0.95 , 1, 0]
-            )},
+const Card  = ({position, name, backgroundColor, activeState, horizontalGestures}) => {
+    const displayDetails = useSharedValue(false)
+    const duration = 100
 
-            {scaleY: interpolate(
-                activeState.value,
-                [position - 1, position, position + 1],
-                [1 , 1, 0]
-            )}
+    const flingUp = Gesture.Fling().direction(Directions.UP)
+        .onStart(() => {
+            console.log("flung up")
+            displayDetails.value = true
+        }).requireExternalGestureToFail(horizontalGestures)
+
+    const flingDown = Gesture.Fling().direction(Directions.DOWN)
+        .onStart(() => {
+            console.log("Flung down")
+            displayDetails.value = false
+        }).requireExternalGestureToFail(horizontalGestures)
+
+    const verticalGestures = Gesture.Exclusive(flingUp, flingDown)
+
+    const cardAnimatedStyles = useAnimatedStyle(() =>( {
+        transform: [
+            {translateY: displayDetails.value === false ? interpolate(
+                    activeState.value,
+                    [position - 1, position],
+                    [-10, 0],
+                ) : withSpring(- height / 10)
+            },
+            {translateX: displayDetails.value === false? interpolate(
+                    activeState.value,
+                    [position, position + 1],
+                    [0, width + width / 2],
+                    {extrapolateLeft: Extrapolation.CLAMP}
+                ): withSpring(0)
+            },
+            {scaleX: displayDetails.value === false ? interpolate(
+                    activeState.value,
+                    [position - 1, position, position + 1],
+                    [0.95 , 1, 0]
+                ): withSpring(1.05)
+            },
+
+            {scaleY: displayDetails.value === false? interpolate(
+                    activeState.value,
+                    [position - 1, position, position + 1],
+                    [1 , 1, 0]
+                ): withSpring(1.05)
+            }
         ]
     })) 
+
+    const detailsAnimatedStyles = useAnimatedStyle(() => ({
+        transform: [
+            {translateY: withDelay(duration, 
+                withSpring(interpolate(
+                    displayDetails.value,
+                    [true, false],
+                    [180, 0]
+                )))
+            }
+        ]
+    }))
     
   return (
-    <Animated.View style={[styles.card, {backgroundColor}, animatedStyles]}>
-        <Text style={{fontSize: 42, color: "#fff", fontWeight: "bold", textTransform: "uppercase"}}>{name}</Text>
+    <Animated.View style={[styles.card, cardAnimatedStyles]}>  
+        <GestureDetector gesture={verticalGestures}>
+            <View style={[{backgroundColor, zIndex: 1}, styles.card]}>
+                <Text style={{fontSize: 42, color: "#fff", fontWeight: "bold", textTransform: "uppercase"}}>{name}</Text>
+            </View>
+        </GestureDetector>
+        <Animated.View style={[styles.details, detailsAnimatedStyles]} />
     </Animated.View>
   )
 }

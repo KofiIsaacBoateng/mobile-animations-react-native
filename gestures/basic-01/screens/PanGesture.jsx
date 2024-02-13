@@ -5,30 +5,30 @@ import { interpolate, useSharedValue, withSpring } from 'react-native-reanimated
 import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler'
 
 const cards = [
-  {
-    id: 1, 
-    name: "card 6",
-    index: 5,
-    background: "#47cc00"
-  },  
-  {
-    id: 2, 
-    name: "card 5",
-    index: 4,
-    background: "skyblue"
-  },  
+  // {
+  //   id: 1, 
+  //   name: "card 6",
+  //   index: 5,
+  //   background: "#47cc00"
+  // },  
+  // {
+  //   id: 2, 
+  //   name: "card 5",
+  //   index: 4,
+  //   background: "skyblue"
+  // },  
   {
     id: 3, 
     name: "card 4",
     index: 3,
-    background: "#cc1800"
+    background: "#47cc00"
   },
 
   {
     id: 4, 
     name: "card 3",
     index: 2,
-    background: "orangered"
+    background: "#cc1800"
   },
 
   {
@@ -64,10 +64,10 @@ const PanGesture = () => {
       })
 
  
-  const gesture = Gesture.Exclusive(flingLeftGesture, flingRightGesture)
+  const horizontalGestures = Gesture.Exclusive(flingLeftGesture, flingRightGesture)
 
   return (
-    <GestureDetector gesture={gesture}>
+    <GestureDetector gesture={horizontalGestures}>
       <View  style={{flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#fff"}}>
           {cards.map((card, _i) => (
             <Card
@@ -77,7 +77,7 @@ const PanGesture = () => {
               name={card.name}
               backgroundColor={card.background}
               activeState={activeState}
-              cardsLength={cards.length}
+              horizontalGestures={horizontalGestures}
             />
           ))}
       </View>
