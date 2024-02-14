@@ -1,6 +1,6 @@
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { Directions, Gesture, GestureDetector } from 'react-native-gesture-handler'
-import Animated, { Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated'
+import Animated, { Extrapolation, interpolate, useAnimatedStyle, useSharedValue, withDelay, withSpring, ReduceMotion } from 'react-native-reanimated'
 import Entypo from 'react-native-vector-icons/Entypo'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 
@@ -35,6 +35,17 @@ const styles = StyleSheet.create({
 const Card  = ({position, name, backgroundColor, activeState, horizontalGestures}) => {
     const displayDetails = useSharedValue(false)
     const duration = 100
+    const withSpringConfig = {
+        duration: 2000,
+        dampingRatio: 0.5,
+        mass: 1,
+        damping: 10,
+        stiffness: 70,
+        overshootClamping: false,
+        restDisplacementThreshold: 0.1,
+        restSpeedThreshold: 2,
+        reduceMotion: ReduceMotion.System,
+    }
 
     const flingUp = Gesture.Fling().direction(Directions.UP)
         .onStart(() => {
@@ -54,7 +65,7 @@ const Card  = ({position, name, backgroundColor, activeState, horizontalGestures
         transform: [
             {translateY: withSpring(
                     displayDetails.value === false ? interpolate(
-                        activeState.value,
+                        Math.floor(activeState.value),
                         [position - 1, position],
                         [-10, 0],
                     ) : - height / 10
@@ -64,30 +75,32 @@ const Card  = ({position, name, backgroundColor, activeState, horizontalGestures
                 displayDetails.value === false? interpolate(
                     activeState.value,
                     [position, position + 1],
-                    [ 0, width ],
+                    [ 0, width * 2 ],
                     {
                         extrapolateLeft: Extrapolation.CLAMP,
+                        extrapolateRight: Extrapolation.CLAMP
                     },
                 ): 0
-            )
+            , withSpringConfig)
             },
             {scaleX: withSpring(
                 displayDetails.value === false ? interpolate(
-                    activeState.value,
-                    [position - 1, position, position + 1],
-                    [0.95 , 1, 0]
+                    Math.floor(activeState.value),
+                    [position - 1, position],
+                    [0.95 , 1],
+                    {extrapolateRight: Extrapolation.CLAMP}
                 ): 1.05
             )
             },
 
-            {scaleY: withSpring(
-                displayDetails.value === false? interpolate(
-                    activeState.value,
-                    [position - 1, position, position + 1],
-                    [1 , 1, 0]
-                ): 1.05
-            )
-            }
+            // {scaleY: withSpring(
+            //     displayDetails.value === false? interpolate(
+            //         Math.floor(activeState.value),
+            //         [position - 1, position, position + 1],
+            //         [1 , 1, 0]
+            //     ): 1.05
+            // , withSpringConfig)
+            // }
         ]
     })) 
 

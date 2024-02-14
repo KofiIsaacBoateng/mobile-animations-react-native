@@ -4,7 +4,7 @@ import {NavigationContainer} from "@react-navigation/native"
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import {createDrawerNavigator} from "@react-navigation/drawer"
 import DrawerContent from './components/DrawerContent'
-import StackedCards from './screens/PanGesture'
+import StackedCards from './screens/StackedCards'
 import TapGesture from './screens/TapGesture'
 import PanTap from './screens/PanTap'
 import ScrollGestures from './screens/ScrollGestures'
