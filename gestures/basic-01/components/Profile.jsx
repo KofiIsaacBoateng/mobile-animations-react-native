@@ -116,12 +116,12 @@ const Profile = ({name, username, profilePhotoUrl, description, type}) => {
                   <FontAwesome name="sign-in"  size={24} color="#fff" />
               </TouchableOpacity>
 
-              <View
+              <TouchableOpacity
                   style={[styles.reaction, {borderRadius: 10, backgroundColor: "#000"}]}
-                  pointerEvents={type === "video" ? "auto": "none"}
+                  disabled={type === "video" ? false: true}
               >
                   <MaterialIcons name="multitrack-audio"  size={24} color="#fff" />
-              </View>
+              </TouchableOpacity>
           </View>
       </View>
 

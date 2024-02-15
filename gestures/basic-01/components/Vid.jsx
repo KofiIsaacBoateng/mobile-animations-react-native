@@ -4,13 +4,19 @@ import { LinearGradient } from 'expo-linear-gradient'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useNavigation } from '@react-navigation/native'
 import VideoPlayer from './VideoPlayer'
 import ImageDisplay from './ImageDisplay'
 import Profile from './Profile'
+import updates from '../assets/updates'
+
+
+// gesture and animation imports 
+import { GestureDetector, Gesture } from 'react-native-gesture-handler'
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, interpolate } from 'react-native-reanimated'
 
 
 const {width, height} = Dimensions.get("window")
@@ -18,6 +24,7 @@ const styles = StyleSheet.create({
     tik: {
         width, 
         height,
+        justifyContent: "center"
     },
 
     overlay: {
@@ -46,6 +53,8 @@ const styles = StyleSheet.create({
 
     statusIndicators: {
         position: "absolute",
+        top: 0,
+        left: 0,
         flexDirection: "row",
         gap: 5,
         alignItems: "center",
@@ -68,25 +77,45 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff6"
     },
 
+    play: {
+        width: 70,
+        height: 70,
+        borderRadius: 100,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#00000075",
+        position: "absolute",
+        alignSelf: "center",
+    }
+
 })
 
 const Videos = ({user, activeUserId}) => {
-    const [status, setStatus ] = useState({})
-    const tikRef = useRef(null)
     const navigation = useNavigation()
+    const [status, setStatus ] = useState({})
+    const [currentIndex, setCurrentIndex] = useState(0)
+    const tikRef = useRef(null)
+    const playButtonScale = useSharedValue(false)
     
     const isPlaying = status.isPlaying ? true: false
+    const rightIndex = currentIndex % updates.length
 
-    const onPress = () => {
-        if(!tikRef.current) return
-
-        if(isPlaying){
-            tikRef.current.pauseAsync()
-        }else {
-            tikRef.current.playAsync()
+    const onSingleTap = () => {
+        console.log("onSingleTap() called");
+        if (!tikRef.current) {
+            console.log("tikRef.current is null");
+            return;
         }
-
-    }
+    
+        if (isPlaying) {
+            console.log("Pausing the video");
+            tikRef.current.pauseAsync();
+        } else {
+            console.log("Playing the video");
+            tikRef.current.playAsync();
+        }
+    };
+    
 
     useEffect(() => {
         if(!tikRef.current) return
@@ -101,73 +130,103 @@ const Videos = ({user, activeUserId}) => {
 
     }, [activeUserId, tikRef.current])
 
+    const doubleTap = Gesture.Tap().numberOfTaps(2)
+        .onEnd((_e, success) => {
+            if(success){ 
+                console.log("double tapped")
+                runOnJS(onSingleTap)()
+                playButtonScale.value = !playButtonScale.value
+            }
+        })
+
+    const singleTap = Gesture.Tap()
+        .onEnd((_e, success) => {
+            console.log("double tapped")
+            
+        })
+
+    const playButtonScaleAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [
+            {scale: withSpring(interpolate(
+                playButtonScale.value,
+                [false, true],
+                [0, 1]
+            ))}
+        ]
+    }))
+    const tapGestures = Gesture.Exclusive(doubleTap, singleTap)
 
   return (
-    
-    <Pressable onPress={() => onPress()} style={styles.tik}>
-        <View style={styles.statusIndicators} >
-            {user.stories.map((story, index) => (
-                <View key = {index} style={styles.indicatorBackground}>
-                    <View style={styles.indicator} />
-                </View>
-            ))}
-        </View>
-        <LinearGradient
-            colors={["#00000095", "transparent", "transparent", "transparent", "transparent", "#00000095"]}
-            style={styles.overlay}
-        />
-        <View style={styles.headerIcons}>
-            <TouchableOpacity
-                onPress={ () => navigation.navigate("Drawer", {screen: "TapGesture"})}
-                style={styles.backBtn}
-            >
-                <MaterialIcons name="keyboard-arrow-left"  size={32} color="#fff9" />
-            </TouchableOpacity>
-            <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
+    <GestureDetector gesture={tapGestures}>
+        <View style={styles.tik}>
+            <View style={styles.statusIndicators} >
+                {user.stories.map((story, index) => (
+                    <View key = {index} style={styles.indicatorBackground}>
+                        <View style={styles.indicator} />
+                    </View>
+                ))}
+            </View>
+            <LinearGradient
+                colors={["#00000095", "transparent", "transparent", "transparent", "transparent", "#00000095"]}
+                style={styles.overlay}
+            />
+            <View style={styles.headerIcons}>
                 <TouchableOpacity
-                    onPress={ () => null}
-                    style={[styles.backBtn, {marginLeft: "auto"}]}
-                >
-                    <EvilIcons name="search"  size={38} color="#fff9" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={ () => null}
+                    onPress={ () => navigation.navigate("Drawer", {screen: "TapGesture"})}
                     style={styles.backBtn}
                 >
-                    <MaterialCommunityIcons name="dots-vertical"  size={32} color="#fff9" />
+                    <MaterialIcons name="keyboard-arrow-left"  size={32} color="#fff9" />
                 </TouchableOpacity>
+                <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
+                    <TouchableOpacity
+                        onPress={ () => null}
+                        style={[styles.backBtn, {marginLeft: "auto"}]}
+                    >
+                        <EvilIcons name="search"  size={38} color="#fff9" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        onPress={ () => null}
+                        style={styles.backBtn}
+                    >
+                        <MaterialCommunityIcons name="dots-vertical"  size={32} color="#fff9" />
+                    </TouchableOpacity>
+                </View>
             </View>
+
+            {/** Video Player and Image Display */}
+
+            {user.stories[rightIndex].storyType === "video" ? (
+                <VideoPlayer 
+                    playerRef={tikRef}
+                    source={user.stories[rightIndex].source}
+                    setStatus={setStatus}
+                    profile={<Profile 
+                        name={user.name} 
+                        username={user.username} 
+                        profilePhotoUrl={user.profilePhotoUrl}
+                        description={user.stories[rightIndex].storyType}
+                        type="video" 
+                    />}
+                />) :
+
+                <ImageDisplay 
+                    source={user.stories[rightIndex].source}
+                    profile={<Profile 
+                        name={user.name} 
+                        username={user.username} 
+                        profilePhotoUrl={user.profilePhotoUrl}
+                        description={user.stories[rightIndex].storyType}
+                        type="image" 
+                    />}
+                />
+            }
+            {/** play icon */}
+            <Animated.View style={[styles.play, playButtonScaleAnimatedStyle]}>
+                <FontAwesome5 size={24} name="play" color="#fff" />
+            </Animated.View>
         </View>
-
-        {/** Video Player and Image Display */}
-
-        {user.stories[0].storyType === "video" ? (
-            <VideoPlayer 
-                playerRef={tikRef}
-                source={user.stories[0].source}
-                setStatus={setStatus}
-                profile={<Profile 
-                    name={user.name} 
-                    username={user.username} 
-                    profilePhotoUrl={user.profilePhotoUrl}
-                    description={user.stories[0].storyType}
-                    type="video" 
-                />}
-            />) :
-
-            <ImageDisplay 
-                source={user.stories[0].source}
-                profile={<Profile 
-                    name={user.name} 
-                    username={user.username} 
-                    profilePhotoUrl={user.profilePhotoUrl}
-                    description={user.stories[0].storyType}
-                    type="image" 
-                />}
-            />
-        }
-    </Pressable>
+    </GestureDetector>
   )
 }
 
