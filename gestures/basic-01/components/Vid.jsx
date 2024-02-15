@@ -16,7 +16,7 @@ import updates from '../assets/updates'
 
 // gesture and animation imports 
 import { GestureDetector, Gesture } from 'react-native-gesture-handler'
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, interpolate } from 'react-native-reanimated'
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming, interpolate, Easing } from 'react-native-reanimated'
 
 
 const {width, height} = Dimensions.get("window")
@@ -98,7 +98,6 @@ const Videos = ({user, activeUserId}) => {
     const playButtonScale = useSharedValue(false)
     
     const isPlaying = status.isPlaying ? true: false
-    const rightIndex = currentIndex % updates.length
 
     const onSingleTap = () => {
         console.log("onSingleTap() called");
@@ -122,14 +121,21 @@ const Videos = ({user, activeUserId}) => {
 
         if(activeUserId !== user.id){
             tikRef.current.pauseAsync()
+            playButtonScale.value = true
         }
 
         if(activeUserId === user.id) {
             tikRef.current.playAsync()
+            playButtonScale.value = false
         }
 
     }, [activeUserId, tikRef.current])
 
+    useEffect(() => {
+
+    }, [currentIndex])
+
+    // double tap gesture
     const doubleTap = Gesture.Tap().numberOfTaps(2)
         .onEnd((_e, success) => {
             if(success){ 
@@ -139,10 +145,16 @@ const Videos = ({user, activeUserId}) => {
             }
         })
 
+    // single tap gesture
     const singleTap = Gesture.Tap()
         .onEnd((_e, success) => {
             console.log("double tapped")
-            
+            if (_e.x > width / 2){
+                runOnJS(setCurrentIndex)((currentIndex + 1) % user.stories.length)
+                console.log(currentIndex)
+            }else {
+                runOnJS(setCurrentIndex)((currentIndex - 1) % user.stories.length)
+            }
         })
 
     const playButtonScaleAnimatedStyle = useAnimatedStyle(() => ({
@@ -154,6 +166,14 @@ const Videos = ({user, activeUserId}) => {
             ))}
         ]
     }))
+
+    const statusIndicatorAnimatedStyle = useAnimatedStyle(() => ({
+        width: withTiming("100%", {
+            duration: 1000,
+            easing: Easing.linear
+        })
+    }))
+
     const tapGestures = Gesture.Exclusive(doubleTap, singleTap)
 
   return (
@@ -196,27 +216,27 @@ const Videos = ({user, activeUserId}) => {
 
             {/** Video Player and Image Display */}
 
-            {user.stories[rightIndex].storyType === "video" ? (
+            {user.stories[currentIndex].storyType === "video" ? (
                 <VideoPlayer 
                     playerRef={tikRef}
-                    source={user.stories[rightIndex].source}
+                    source={user.stories[currentIndex].source}
                     setStatus={setStatus}
                     profile={<Profile 
                         name={user.name} 
                         username={user.username} 
                         profilePhotoUrl={user.profilePhotoUrl}
-                        description={user.stories[rightIndex].storyType}
+                        description={user.stories[currentIndex].storyType}
                         type="video" 
                     />}
                 />) :
 
                 <ImageDisplay 
-                    source={user.stories[rightIndex].source}
+                    source={user.stories[currentIndex].source}
                     profile={<Profile 
                         name={user.name} 
                         username={user.username} 
                         profilePhotoUrl={user.profilePhotoUrl}
-                        description={user.stories[rightIndex].storyType}
+                        description={user.stories[currentIndex].storyType}
                         type="image" 
                     />}
                 />
