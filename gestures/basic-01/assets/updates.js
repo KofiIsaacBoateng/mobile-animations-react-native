@@ -5,20 +5,20 @@ export default [
         id: Math.random() * 100,
         profilePhotoUrl: require("./imgs/img-01.jpg"),
         stories: [
-            {
-                storyType: "video",
-                source: require("./videos/mb-01.mp4")
-            },
-
-            {
-                storyType: "video",
-                source: require("./videos/mb-03.mp4")
-            },
+            // {
+            //     storyType: "video",
+            //     source: require("./videos/mb-01.mp4")
+            // },
 
             // {
-            //     storyType: "image",
-            //     source: require("./imgs/story-00.jpg")
+            //     storyType: "video",
+            //     source: require("./videos/mb-03.mp4")
             // },
+
+            {
+                storyType: "image",
+                source: require("./imgs/story-00.jpg")
+            },
         ]
     },
 
@@ -28,20 +28,20 @@ export default [
         id: Math.random() * 100,
         profilePhotoUrl: require("./imgs/img-04.jpg"),
         stories: [
-            {
-                storyType: "video",
-                source: require("./videos/mb-02.mp4")
-            },
-
             // {
-            //     storyType: "image",
-            //     source: require("./imgs/story-01.jpg")
+            //     storyType: "video",
+            //     source: require("./videos/mb-02.mp4")
             // },
 
             {
-                storyType: "video",
-                source: require("./videos/mb-06.mp4")
+                storyType: "image",
+                source: require("./imgs/story-01.jpg")
             },
+
+            // {
+            //     storyType: "video",
+            //     source: require("./videos/mb-06.mp4")
+            // },
         ]
     },
 
@@ -74,15 +74,15 @@ export default [
         id: Math.random() * 100,
         profilePhotoUrl: require("./imgs/img-03.jpg"),
         stories: [
-            {
-                storyType: "video",
-                source: require( "./videos/mb-04.mp4")
-            },
-
             // {
-            //     storyType: "image",
-            //     source: require( "./imgs/story-03.jpg")
+            //     storyType: "video",
+            //     source: require( "./videos/mb-04.mp4")
             // },
+
+            {
+                storyType: "image",
+                source: require( "./imgs/story-03.jpg")
+            },
 
             // {
             //     storyType: "image",

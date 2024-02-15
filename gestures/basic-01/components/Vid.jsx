@@ -1,12 +1,16 @@
-import { Dimensions, StyleSheet, Text, View, Pressable } from 'react-native'
+import { Dimensions, StyleSheet, Text, View, Pressable, Image } from 'react-native'
 import React, { useEffect, useState, useRef }  from 'react'
-import { Video, ResizeMode } from 'expo-av'
 import { LinearGradient } from 'expo-linear-gradient'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import AntDesign from 'react-native-vector-icons/AntDesign'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useNavigation } from '@react-navigation/native'
+import VideoPlayer from './VideoPlayer'
+import ImageDisplay from './ImageDisplay'
+import Profile from './Profile'
 
 
 const {width, height} = Dimensions.get("window")
@@ -14,12 +18,6 @@ const styles = StyleSheet.create({
     tik: {
         width, 
         height,
-    },
-
-    video: {
-        width: "100%",
-        height: "100%",
-        zIndex: -1
     },
 
     overlay: {
@@ -61,21 +59,22 @@ const styles = StyleSheet.create({
     indicatorBackground: {
         height: 3,
         flexGrow: 1,
-        backgroundColor: "darkgray",
+        backgroundColor: "#aaa5",
     },
 
     indicator: {
         width: "50%",
         height: "100%",
-        backgroundColor: "lightgray"
-    }
+        backgroundColor: "#fff6"
+    },
+
 })
 
 const Videos = ({user, activeUserId}) => {
     const [status, setStatus ] = useState({})
     const tikRef = useRef(null)
     const navigation = useNavigation()
-
+    
     const isPlaying = status.isPlaying ? true: false
 
     const onPress = () => {
@@ -107,21 +106,14 @@ const Videos = ({user, activeUserId}) => {
     
     <Pressable onPress={() => onPress()} style={styles.tik}>
         <View style={styles.statusIndicators} >
-            <View style={styles.indicatorBackground}>
-                <View style={styles.indicator} />
-            </View>
-            <View style={styles.indicatorBackground}>
-                <View style={styles.indicator} />
-            </View>
-            <View style={styles.indicatorBackground}>
-                <View style={styles.indicator} />
-            </View>
-            <View style={styles.indicatorBackground}>
-                <View style={styles.indicator} />
-            </View>
+            {user.stories.map((story, index) => (
+                <View key = {index} style={styles.indicatorBackground}>
+                    <View style={styles.indicator} />
+                </View>
+            ))}
         </View>
         <LinearGradient
-            colors={["#00000095", "transparent", "transparent"]}
+            colors={["#00000095", "transparent", "transparent", "transparent", "transparent", "#00000095"]}
             style={styles.overlay}
         />
         <View style={styles.headerIcons}>
@@ -133,34 +125,48 @@ const Videos = ({user, activeUserId}) => {
             </TouchableOpacity>
             <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
                 <TouchableOpacity
-                    onPress={ () => navigation.navigate("Drawer", {screen: "TapGesture"})}
+                    onPress={ () => null}
                     style={[styles.backBtn, {marginLeft: "auto"}]}
                 >
                     <EvilIcons name="search"  size={38} color="#fff9" />
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={ () => navigation.navigate("Drawer", {screen: "TapGesture"})}
+                    onPress={ () => null}
                     style={styles.backBtn}
                 >
                     <MaterialCommunityIcons name="dots-vertical"  size={32} color="#fff9" />
                 </TouchableOpacity>
             </View>
         </View>
-        <Video
-            ref = {tikRef}
-            source={user.stories[0].source}
-            style={styles.video}
-            resizeMode={ResizeMode.CONTAIN}
-            isLooping
-            onPlaybackStatusUpdate={(status) => setStatus(prev => status)}
-        />
-        {/** profile */}
-        <View>
-            {/** image */}
-            {/** flex name and username */}
-            {/** image */}
-        </View>
+
+        {/** Video Player and Image Display */}
+
+        {user.stories[0].storyType === "video" ? (
+            <VideoPlayer 
+                playerRef={tikRef}
+                source={user.stories[0].source}
+                setStatus={setStatus}
+                profile={<Profile 
+                    name={user.name} 
+                    username={user.username} 
+                    profilePhotoUrl={user.profilePhotoUrl}
+                    description={user.stories[0].storyType}
+                    type="video" 
+                />}
+            />) :
+
+            <ImageDisplay 
+                source={user.stories[0].source}
+                profile={<Profile 
+                    name={user.name} 
+                    username={user.username} 
+                    profilePhotoUrl={user.profilePhotoUrl}
+                    description={user.stories[0].storyType}
+                    type="image" 
+                />}
+            />
+        }
     </Pressable>
   )
 }
