@@ -130,6 +130,7 @@ const Videos = ({user, activeUserId}) => {
 
     }, [activeUserId, tikRef.current])
 
+    {/*** Update stories indicator on current index */}
     useEffect(() => {
 
     }, [currentIndex])
@@ -183,7 +184,14 @@ const Videos = ({user, activeUserId}) => {
             <View style={styles.statusIndicators} >
                 {user.stories.map((story, index) => (
                     <View key = {index} style={styles.indicatorBackground}>
-                        <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle]} />
+                        <Animated.View 
+                            style={[
+                                styles.indicator,
+                                (currentIndex > index) && {width: "100%"},
+                                (currentIndex === index) && statusIndicatorAnimatedStyle,
+                                (currentIndex < index) && {width: 0}
+                            ]} 
+                        />
                     </View>
                 ))}
             </View>
