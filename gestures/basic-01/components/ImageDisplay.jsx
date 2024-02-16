@@ -1,7 +1,5 @@
 import { StyleSheet, Image, Dimensions, View } from 'react-native'
 import React from 'react'
-import { FlipInEasyX } from 'react-native-reanimated'
-import Profile from './Profile'
 
 const {width, height} = Dimensions.get("window")
 const styles = StyleSheet.create({

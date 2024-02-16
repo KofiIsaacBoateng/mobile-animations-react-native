@@ -72,7 +72,6 @@ const styles = StyleSheet.create({
     },
 
     indicator: {
-        width: "50%",
         height: "100%",
         backgroundColor: "#fff6"
     },
@@ -148,12 +147,14 @@ const Videos = ({user, activeUserId}) => {
     // single tap gesture
     const singleTap = Gesture.Tap()
         .onEnd((_e, success) => {
-            console.log("double tapped")
-            if (_e.x > width / 2){
-                runOnJS(setCurrentIndex)((currentIndex + 1) % user.stories.length)
-                console.log(currentIndex)
-            }else {
-                runOnJS(setCurrentIndex)((currentIndex - 1) % user.stories.length)
+            console.log("single tapped")
+            if(success) {
+                if (_e.x > width / 2){
+                    runOnJS(setCurrentIndex)((currentIndex + 1) % user.stories.length)
+                    console.log(currentIndex)
+                }else {
+                    runOnJS(setCurrentIndex)(currentIndex <= 0 ? 0 : currentIndex - 1)
+                }
             }
         })
 
@@ -182,7 +183,7 @@ const Videos = ({user, activeUserId}) => {
             <View style={styles.statusIndicators} >
                 {user.stories.map((story, index) => (
                     <View key = {index} style={styles.indicatorBackground}>
-                        <View style={styles.indicator} />
+                        <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle]} />
                     </View>
                 ))}
             </View>
@@ -217,18 +218,26 @@ const Videos = ({user, activeUserId}) => {
             {/** Video Player and Image Display */}
 
             {user.stories[currentIndex].storyType === "video" ? (
-                <VideoPlayer 
-                    playerRef={tikRef}
-                    source={user.stories[currentIndex].source}
-                    setStatus={setStatus}
-                    profile={<Profile 
-                        name={user.name} 
-                        username={user.username} 
-                        profilePhotoUrl={user.profilePhotoUrl}
-                        description={user.stories[currentIndex].storyType}
-                        type="video" 
-                    />}
-                />) :
+                <>
+                    <VideoPlayer 
+                        playerRef={tikRef}
+                        source={user.stories[currentIndex].source}
+                        setStatus={setStatus}
+                        profile={<Profile 
+                            name={user.name} 
+                            username={user.username} 
+                            profilePhotoUrl={user.profilePhotoUrl}
+                            description={user.stories[currentIndex].storyType}
+                            type="video" 
+                        />}
+                    />
+
+                    {/** play icon */}
+                    <Animated.View style={[styles.play, playButtonScaleAnimatedStyle]}>
+                        <FontAwesome5 size={24} name="play" color="#fff" />
+                    </Animated.View>
+                </>
+                ) :
 
                 <ImageDisplay 
                     source={user.stories[currentIndex].source}
@@ -241,10 +250,6 @@ const Videos = ({user, activeUserId}) => {
                     />}
                 />
             }
-            {/** play icon */}
-            <Animated.View style={[styles.play, playButtonScaleAnimatedStyle]}>
-                <FontAwesome5 size={24} name="play" color="#fff" />
-            </Animated.View>
         </View>
     </GestureDetector>
   )
