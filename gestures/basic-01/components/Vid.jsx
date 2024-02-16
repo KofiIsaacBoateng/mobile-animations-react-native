@@ -95,6 +95,7 @@ const Videos = ({user, activeUserId}) => {
     const [currentIndex, setCurrentIndex] = useState(0)
     const tikRef = useRef(null)
     const playButtonScale = useSharedValue(false)
+    const playPosition = useSharedValue(0)
     
     const isPlaying = status.isPlaying ? true: false
 
@@ -170,7 +171,7 @@ const Videos = ({user, activeUserId}) => {
     }))
 
     const statusIndicatorAnimatedStyle = useAnimatedStyle(() => ({
-        width: withTiming("100%", {
+        width: withTiming(`${playPosition.value * 100}%`, {
             duration: 1000,
             easing: Easing.linear
         })
