@@ -99,8 +99,9 @@ const Videos = ({user, activeUserId}) => {
     
     const isPlaying = status.isPlaying ? true: false
 
-    const onSingleTap = () => {
-        console.log("onSingleTap() called");
+    // single tap function to update current story
+    const onDou = () => {
+        console.log("onDou() called");
         if (!tikRef.current) {
             console.log("tikRef.current is null");
             return;
@@ -115,7 +116,7 @@ const Videos = ({user, activeUserId}) => {
         }
     };
     
-
+    // auto play video if in view
     useEffect(() => {
         if(!tikRef.current) return
 
@@ -131,17 +132,13 @@ const Videos = ({user, activeUserId}) => {
 
     }, [activeUserId, tikRef.current])
 
-    {/*** Update stories indicator on current index */}
-    useEffect(() => {
-
-    }, [currentIndex])
 
     // double tap gesture
     const doubleTap = Gesture.Tap().numberOfTaps(2)
         .onEnd((_e, success) => {
             if(success){ 
                 console.log("double tapped")
-                runOnJS(onSingleTap)()
+                runOnJS(onDou)()
                 playButtonScale.value = !playButtonScale.value
             }
         })
@@ -152,7 +149,7 @@ const Videos = ({user, activeUserId}) => {
             console.log("single tapped")
             if(success) {
                 if (_e.x > width / 2){
-                    runOnJS(setCurrentIndex)((currentIndex + 1) % user.stories.length)
+                    runOnJS(setCurrentIndex)(currentIndex >= user.stories.length - 1 ? user.stories.length - 1 : currentIndex + 1)
                     console.log(currentIndex)
                 }else {
                     runOnJS(setCurrentIndex)(currentIndex <= 0 ? 0 : currentIndex - 1)
@@ -170,11 +167,18 @@ const Videos = ({user, activeUserId}) => {
         ]
     }))
 
-    const statusIndicatorAnimatedStyle = useAnimatedStyle(() => ({
-        width: withTiming(`${playPosition.value * 100}%`, {
-            duration: 1000,
+        {/*** Update stories indicator on current index */}
+    useEffect(() => {
+        playPosition.value = 0
+        playPosition.value = withTiming(1, {
+            duration: 2000,
             easing: Easing.linear
         })
+        console.log("current index:", currentIndex)
+    }, [currentIndex, user.id])
+
+    const statusIndicatorAnimatedStyle = useAnimatedStyle(() => ({
+        width: `${playPosition.value * 100}%`
     }))
 
     const tapGestures = Gesture.Exclusive(doubleTap, singleTap)
@@ -188,9 +192,9 @@ const Videos = ({user, activeUserId}) => {
                         <Animated.View 
                             style={[
                                 styles.indicator,
-                                (currentIndex > index) && {width: "100%"},
-                                (currentIndex === index) && statusIndicatorAnimatedStyle,
-                                (currentIndex < index) && {width: 0}
+                                (currentIndex > index) && (user.id === activeUserId) && {width: "100%"},
+                                (currentIndex === index) && (user.id === activeUserId)  && statusIndicatorAnimatedStyle,
+                                (currentIndex < index) && (user.id === activeUserId) && {width: 0}
                             ]} 
                         />
                     </View>

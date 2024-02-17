@@ -22,7 +22,7 @@ const VideoPlayer = ({playerRef, source, profile, setStatus}) => {
             style={styles.video}
             resizeMode={ResizeMode.CONTAIN}
             isLooping
-            isMuted
+            isMuted={true}
             onPlaybackStatusUpdate={(status) => setStatus(prev => status)}
         />
 
