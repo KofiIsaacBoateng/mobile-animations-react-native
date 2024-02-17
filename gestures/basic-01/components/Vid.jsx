@@ -144,7 +144,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
 
     // go to next story 
     const next = () => {
-        setCurrentIndex(prev => prev >= user.stories.length - 1 ? user.stories.length - 1 : prev + 1 )
+        setCurrentIndex(prev => prev >= user.stories.length - 1 ? user.stories.length - 1 : currentIndex + 1 )
         progress.value = 0
     }
 
@@ -191,23 +191,26 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
 
     {/*** Update stories indicator progress on current index and user id change */}
     useEffect(() => {
-        const durationMillis = status?.durationMillis // total play time  for video or 1 for photo
-        const positionMillis = status.positionMillis // play progress level for video or 1 for photo
-        console.log("~~~~~~~ Stating brand new log ~~~~~~~~\n\n\n\n")
-        console.log(user.stories[currentIndex])
-        progress.value = user.stories[currentIndex].storyType === "video" ? 
-            withTiming(positionMillis / durationMillis, {
-                duration: 1000,
-                easing: Easing.linear
-            }) : 
-            withTiming(1, {
-                duration: 5000,
-                easing: Easing.linear
-            })
-        // console.log("current index:", currentIndex)
-        console.log("position millis: ", positionMillis)
-        console.log("duration millis: ", durationMillis)
-        console.log("progress: ", progress.value)
+        // console.log(user.stories[currentIndex])
+        console.log(currentIndex)
+        if (user.stories[currentIndex].storyType === "video"){
+            const durationMillis = status?.durationMillis // total play time  for video
+            const positionMillis = status?.positionMillis // play progress level for video
+            // console.log("\n~~~~~~~ Stating brand new VIDEO log ~~~~~~~~\n")
+            // console.log("position millis: ", positionMillis)
+            // console.log("duration millis: ", durationMillis)
+            // console.log("progress: ", progress.value)
+            if(durationMillis === undefined || positionMillis === undefined){
+                console.log("undefined: durationMillis - positionMillis\n", durationMillis, " - ", positionMillis)
+                progress.value = 0
+            }else {
+                console.log("defined: durationMillis - positionMillis\n", durationMillis, " - ", positionMillis)
+                progress.value = (positionMillis / durationMillis)
+            }
+        }else if (user.stories[currentIndex].storyType === "photo") {
+            console.log("\n~~~~~~~ Stating brand new PHOTO log ~~~~~~~~\n")
+            progress.value = 1
+        }
     }, [currentIndex, activeUserId, status])
 
     {/** update stories indicator progress based on playback.didJustFinished */}
@@ -216,7 +219,10 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     // status indicator with animation
     const statusIndicatorAnimatedStyle = useAnimatedStyle(() => {
         return {
-            width: `${progress.value * 100}%`
+            width: withTiming(`${progress.value * 100}%`, {
+                duration: user.stories[currentIndex].storyType === "video" ? 1000 : 10 * 1000,
+                easing: Easing.linear
+            })
         }
     })
 
@@ -238,13 +244,15 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
         <View style={styles.tik}>
             <View style={styles.statusIndicators} >
                 {user.stories.map((story, index) => (
-                    <View key = {`${index}-${user.id}`} style={styles.indicatorBackground}>
+                    <View key = {`${index}-${story.source}`} style={styles.indicatorBackground}>
                         <Animated.View 
                             style={[
                                 styles.indicator,
-                                (currentIndex > index) && (user.id === activeUserId) && {width: "100%"},
-                                (currentIndex === index) && (user.id === activeUserId)  && statusIndicatorAnimatedStyle,
-                                (currentIndex < index) && (user.id === activeUserId) && {width: "0%"},
+                                (currentIndex > index) ? 
+                                        {width: "100%"} : 
+                                    (currentIndex <= index) ? 
+                                        {width: "0%"} :
+                                    statusIndicatorAnimatedStyle,
                             ]} 
                         />
                     </View>
