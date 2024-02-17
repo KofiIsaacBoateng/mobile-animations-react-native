@@ -16,7 +16,16 @@ import updates from '../assets/updates'
 
 // gesture and animation imports 
 import { GestureDetector, Gesture } from 'react-native-gesture-handler'
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming, interpolate, Easing } from 'react-native-reanimated'
+import Animated, { 
+    runOnJS, 
+    useAnimatedStyle, 
+    useSharedValue, 
+    withSpring, 
+    withTiming, 
+    interpolate, 
+    Easing,
+    useAnimatedReaction
+} from 'react-native-reanimated'
 
 
 const {width, height} = Dimensions.get("window")
@@ -73,6 +82,7 @@ const styles = StyleSheet.create({
 
     indicator: {
         height: "100%",
+        width: "0%",
         backgroundColor: "#fff6"
     },
 
@@ -89,21 +99,21 @@ const styles = StyleSheet.create({
 
 })
 
-const Videos = ({user, activeUserId}) => {
+const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     const navigation = useNavigation()
     const [status, setStatus ] = useState({})
-    const [currentIndex, setCurrentIndex] = useState(0)
+    const [vidIsLoading, setVidIsLoading] = useState(false)
     const tikRef = useRef(null)
     const playButtonScale = useSharedValue(false)
-    const playPosition = useSharedValue(0)
+    const progress = useSharedValue(0)
     
     const isPlaying = status.isPlaying ? true: false
 
-    // single tap function to update current story
-    const onDou = () => {
-        console.log("onDou() called");
+    // double tap function to play or pause video
+    const onDoubleTap = () => {
+        // console.log("onDoubleTap() called");
         if (!tikRef.current) {
-            console.log("tikRef.current is null");
+            // console.log("tikRef.current is null");
             return;
         }
     
@@ -132,34 +142,45 @@ const Videos = ({user, activeUserId}) => {
 
     }, [activeUserId, tikRef.current])
 
+    // go to next story 
+    const next = () => {
+        setCurrentIndex(prev => prev >= user.stories.length - 1 ? user.stories.length - 1 : prev + 1 )
+        progress.value = 0
+    }
+
+    // go to prev story 
+    const back = () => {
+        setCurrentIndex(prev => prev <= 0 ? 0 : prev - 1 )
+        progress.value = 0
+    }
+
 
     // double tap gesture
     const doubleTap = Gesture.Tap().numberOfTaps(2)
         .onEnd((_e, success) => {
             if(success){ 
-                console.log("double tapped")
-                runOnJS(onDou)()
+                // console.log("double tapped")
+                runOnJS(onDoubleTap)()
                 playButtonScale.value = !playButtonScale.value
             }
         })
 
-    // single tap gesture
+    // single tap gesture to update current story
     const singleTap = Gesture.Tap()
         .onEnd((_e, success) => {
-            console.log("single tapped")
+            // console.log("single tapped")
             if(success) {
                 if (_e.x > width / 2){
-                    runOnJS(setCurrentIndex)(currentIndex >= user.stories.length - 1 ? user.stories.length - 1 : currentIndex + 1)
-                    console.log(currentIndex)
+                    runOnJS(next)()
                 }else {
-                    runOnJS(setCurrentIndex)(currentIndex <= 0 ? 0 : currentIndex - 1)
+                    runOnJS(back)()
                 }
             }
         })
 
     const playButtonScaleAnimatedStyle = useAnimatedStyle(() => ({
         transform: [
-            {scale: withSpring(interpolate(
+            {scale: withTiming(interpolate(
                 playButtonScale.value,
                 [false, true],
                 [0, 1]
@@ -167,19 +188,48 @@ const Videos = ({user, activeUserId}) => {
         ]
     }))
 
-        {/*** Update stories indicator on current index */}
-    useEffect(() => {
-        playPosition.value = 0
-        playPosition.value = withTiming(1, {
-            duration: 2000,
-            easing: Easing.linear
-        })
-        console.log("current index:", currentIndex)
-    }, [currentIndex, user.id])
 
-    const statusIndicatorAnimatedStyle = useAnimatedStyle(() => ({
-        width: `${playPosition.value * 100}%`
-    }))
+    {/*** Update stories indicator progress on current index and user id change */}
+    useEffect(() => {
+        const durationMillis = status?.durationMillis // total play time  for video or 1 for photo
+        const positionMillis = status.positionMillis // play progress level for video or 1 for photo
+        console.log("~~~~~~~ Stating brand new log ~~~~~~~~\n\n\n\n")
+        console.log(user.stories[currentIndex])
+        progress.value = user.stories[currentIndex].storyType === "video" ? 
+            withTiming(positionMillis / durationMillis, {
+                duration: 1000,
+                easing: Easing.linear
+            }) : 
+            withTiming(1, {
+                duration: 5000,
+                easing: Easing.linear
+            })
+        // console.log("current index:", currentIndex)
+        console.log("position millis: ", positionMillis)
+        console.log("duration millis: ", durationMillis)
+        console.log("progress: ", progress.value)
+    }, [currentIndex, activeUserId, status])
+
+    {/** update stories indicator progress based on playback.didJustFinished */}
+    const updateProgressValueToOne = () => progress.value = 1
+
+    // status indicator with animation
+    const statusIndicatorAnimatedStyle = useAnimatedStyle(() => {
+        return {
+            width: `${progress.value * 100}%`
+        }
+    })
+
+
+    useAnimatedReaction(
+        () => progress.value,
+        (currentProgress, prevProgress) => {
+            if(prevProgress !== currentProgress && progress.value && progress.value === 1 ) {
+                runOnJS(next)()
+            }
+        }
+    )
+
 
     const tapGestures = Gesture.Exclusive(doubleTap, singleTap)
 
@@ -188,13 +238,13 @@ const Videos = ({user, activeUserId}) => {
         <View style={styles.tik}>
             <View style={styles.statusIndicators} >
                 {user.stories.map((story, index) => (
-                    <View key = {index} style={styles.indicatorBackground}>
+                    <View key = {`${index}-${user.id}`} style={styles.indicatorBackground}>
                         <Animated.View 
                             style={[
                                 styles.indicator,
                                 (currentIndex > index) && (user.id === activeUserId) && {width: "100%"},
                                 (currentIndex === index) && (user.id === activeUserId)  && statusIndicatorAnimatedStyle,
-                                (currentIndex < index) && (user.id === activeUserId) && {width: 0}
+                                (currentIndex < index) && (user.id === activeUserId) && {width: "0%"},
                             ]} 
                         />
                     </View>
@@ -236,6 +286,9 @@ const Videos = ({user, activeUserId}) => {
                         playerRef={tikRef}
                         source={user.stories[currentIndex].source}
                         setStatus={setStatus}
+                        isLoading={vidIsLoading}
+                        setIsLoading={setVidIsLoading}
+                        updateProgressValueToOne={updateProgressValueToOne}
                         profile={<Profile 
                             name={user.name} 
                             username={user.username} 
@@ -259,7 +312,7 @@ const Videos = ({user, activeUserId}) => {
                         username={user.username} 
                         profilePhotoUrl={user.profilePhotoUrl}
                         description={user.stories[currentIndex].storyType}
-                        type="image" 
+                        type="image"
                     />}
                 />
             }

@@ -15,12 +15,15 @@ const styles = StyleSheet.create({
 
 const TikReels = () => {
     const [activeUserId, setActiveUserId] = useState("")
+    const [currentIndex, setCurrentIndex] = useState(0)
     const viewabilityConfigPairs = useRef([
         {
             viewabilityConfig: {itemVisiblePercentThreshold: "50"},
             onViewableItemsChanged:  ({_changed, viewableItems}) => {
-                if(viewableItems.length > 0 && viewableItems[0].isViewable)
+                if(viewableItems.length > 0 && viewableItems[0].isViewable){
                     setActiveUserId(prev => viewableItems[0].item.id)
+                    setCurrentIndex(prev => 0)
+                }
             }
         },
     ])
@@ -36,7 +39,12 @@ const TikReels = () => {
                 bounces={true}
                 showsVerticalScrollIndicator={false}
                 renderItem={({item, index}) => (
-                    <Vid user={item} activeUserId={activeUserId} />
+                    <Vid 
+                        user={item} 
+                        activeUserId={activeUserId}
+                        currentIndex={currentIndex}
+                        setCurrentIndex={setCurrentIndex}
+                    />
                 )}
                 viewabilityConfigCallbackPairs={viewabilityConfigPairs.current}
             />
