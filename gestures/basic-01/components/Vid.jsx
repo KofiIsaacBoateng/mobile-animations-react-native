@@ -145,13 +145,11 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     // go to next story 
     const next = () => {
         setCurrentIndex(prev => prev >= user.stories.length - 1 ? user.stories.length - 1 : currentIndex + 1 )
-        progress.value = 0
     }
 
     // go to prev story 
     const back = () => {
         setCurrentIndex(prev => prev <= 0 ? 0 : prev - 1 )
-        progress.value = 0
     }
 
 
@@ -172,8 +170,10 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
             if(success) {
                 if (_e.x > width / 2){
                     runOnJS(next)()
+                    progress.value = withTiming(0, {duration: 0})
                 }else {
                     runOnJS(back)()
+                    progress.value = withTiming(0, {duration: 10})
                 }
             }
         })
@@ -209,6 +209,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
             }
         }else if (user.stories[currentIndex].storyType === "photo") {
             console.log("\n~~~~~~~ Stating brand new PHOTO log ~~~~~~~~\n")
+            progress.value = 0
             progress.value = 1
         }
     }, [currentIndex, activeUserId, status])
@@ -220,7 +221,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     const statusIndicatorAnimatedStyle = useAnimatedStyle(() => {
         return {
             width: withTiming(`${progress.value * 100}%`, {
-                duration: user.stories[currentIndex].storyType === "video" ? 1000 : 10 * 1000,
+                duration: user.stories[currentIndex].storyType === "video"? 1000: 10 * 1000,
                 easing: Easing.linear
             })
         }
@@ -250,7 +251,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
                                 styles.indicator,
                                 (currentIndex > index) ? 
                                         {width: "100%"} : 
-                                    (currentIndex <= index) ? 
+                                    (currentIndex < index) ? 
                                         {width: "0%"} :
                                     statusIndicatorAnimatedStyle,
                             ]} 
