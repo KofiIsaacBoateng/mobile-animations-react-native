@@ -20,7 +20,7 @@ import Animated, {
     runOnJS, 
     useAnimatedStyle, 
     useSharedValue, 
-    withSpring, 
+    withDelay, 
     withTiming, 
     interpolate, 
     Easing,
@@ -106,6 +106,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     const tikRef = useRef(null)
     const playButtonScale = useSharedValue(false)
     const progress = useSharedValue(0)
+    let positionMillis, durationMillis
     
     const isPlaying = status.isPlaying ? true: false
 
@@ -117,14 +118,25 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
             return;
         }
     
-        if (isPlaying) {
-            console.log("Pausing the video");
-            tikRef.current.pauseAsync();
-        } else {
-            console.log("Playing the video");
-            tikRef.current.playAsync();
-        }
+        // if (isPlaying) {
+        //     console.log("Pausing the video");
+        //     tikRef.current.pauseAsync();
+        // } else {
+        //     console.log("Playing the video");
+        //     tikRef.current.playAsync();
+        // }
+
+        tikRef.current.pauseAsync();
     };
+
+    const playVideoAsync = () => {
+        if (!tikRef.current) {
+            return
+        }
+
+        tikRef.current.playAsync()
+        playButtonScale.value = false
+    }
     
     // auto play video if in view
     useEffect(() => {
@@ -145,21 +157,23 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     // go to next story 
     const next = () => {
         setCurrentIndex(prev => prev >= user.stories.length - 1 ? user.stories.length - 1 : currentIndex + 1 )
+        progress.value = 0
     }
 
     // go to prev story 
     const back = () => {
         setCurrentIndex(prev => prev <= 0 ? 0 : prev - 1 )
+        progress.value = 0
     }
 
 
-    // double tap gesture
+    // double tap gesture to pause video
     const doubleTap = Gesture.Tap().numberOfTaps(2)
         .onEnd((_e, success) => {
             if(success){ 
                 // console.log("double tapped")
                 runOnJS(onDoubleTap)()
-                playButtonScale.value = !playButtonScale.value
+                playButtonScale.value = true
             }
         })
 
@@ -170,21 +184,21 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
             if(success) {
                 if (_e.x > width / 2){
                     runOnJS(next)()
-                    progress.value = withTiming(0, {duration: 0})
                 }else {
                     runOnJS(back)()
-                    progress.value = withTiming(0, {duration: 10})
                 }
             }
         })
 
+    // play button scale animation
     const playButtonScaleAnimatedStyle = useAnimatedStyle(() => ({
         transform: [
-            {scale: withTiming(interpolate(
-                playButtonScale.value,
-                [false, true],
-                [0, 1]
-            ))}
+            {scale: withDelay(1000, withTiming(interpolate(
+                    playButtonScale.value,
+                    [false, true],
+                    [0, 1]
+                )))
+            }
         ]
     }))
 
@@ -194,8 +208,8 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
         // console.log(user.stories[currentIndex])
         console.log(currentIndex)
         if (user.stories[currentIndex].storyType === "video"){
-            const durationMillis = status?.durationMillis // total play time  for video
-            const positionMillis = status?.positionMillis // play progress level for video
+            durationMillis = status?.durationMillis // total play time  for video
+            positionMillis = status?.positionMillis // play progress level for video
             // console.log("\n~~~~~~~ Stating brand new VIDEO log ~~~~~~~~\n")
             // console.log("position millis: ", positionMillis)
             // console.log("duration millis: ", durationMillis)
@@ -227,12 +241,15 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
         }
     })
 
-
+    // watching progress to automate the playing the next story when done
     useAnimatedReaction(
         () => progress.value,
         (currentProgress, prevProgress) => {
             if(prevProgress !== currentProgress && progress.value && progress.value === 1 ) {
                 runOnJS(next)()
+                progress.value = 0
+                positionMillis = 0
+                durationMillis = 0
             }
         }
     )
@@ -309,7 +326,18 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
 
                     {/** play icon */}
                     <Animated.View style={[styles.play, playButtonScaleAnimatedStyle]}>
-                        <FontAwesome5 size={24} name="play" color="#fff" />
+                    <TouchableOpacity
+                        onPress={playVideoAsync}
+                    >
+                        {playButtonScale.value ?(
+                            <FontAwesome5 size={24} name="play" color="#fff" />
+                        ): (
+                            <FontAwesome5 size={24} name="pause" color="#fff" />
+                        )
+
+                        }
+                    </TouchableOpacity>
+
                     </Animated.View>
                 </>
                 ) :
