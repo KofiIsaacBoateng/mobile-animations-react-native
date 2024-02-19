@@ -24,11 +24,11 @@ bottomLeft: {
     width: width * 0.7,
     paddingLeft: 10,
     marginLeft: 5,
-    backgroundColor: "#0003",
+    backgroundColor: "transparent",
     paddingVertical: 10,
     borderRadius: 8,
     alignSelf: "flex-end",
-    gap: 10
+    gap: 5
 },
 
 bottomRight: {
@@ -77,8 +77,8 @@ const Profile = ({name, username, profilePhotoUrl, description, type}) => {
       <View style={styles.bottom}>
           {/** username and description */}
           <View style={styles.bottomLeft}>
-              <Text style={{color: "#ffffffc9", fontSize: 16, letterSpacing: 2, fontWeight: "700"}}>@ {username}</Text>
-              <Text style={{color: "#ccccccd9"}}>Just some random text describing what the update is about. Could be what action you require your viewers take or whatever info you would wanna pass around...</Text>
+              <Text style={{color: "#ffffff", fontSize: 16, letterSpacing: 2, fontWeight: "700"}}>@ {username}</Text>
+              <Text style={{color: "#ffffffd9"}}>Just some random text describing what the update is about. Could be what ...</Text>
           </View>
 
           {/** icons and userProfile */}

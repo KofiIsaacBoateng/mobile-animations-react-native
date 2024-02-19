@@ -85,7 +85,7 @@ export default [
             },
 
             {
-                storyType: "image",
+                storyType: "video",
                 source: require( "./videos/mb-05.mp4")
             },
         ]

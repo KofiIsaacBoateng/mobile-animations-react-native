@@ -101,14 +101,11 @@ const styles = StyleSheet.create({
 
 const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     const navigation = useNavigation()
-    const [status, setStatus ] = useState({})
     const [vidIsLoading, setVidIsLoading] = useState(false)
     const tikRef = useRef(null)
     const playButtonScale = useSharedValue(false)
     const progress = useSharedValue(0)
-    let positionMillis, durationMillis
-    
-    const isPlaying = status.isPlaying ? true: false
+    const [videoProgress, setVideoProgress] = useState(0)
 
     // double tap function to play or pause video
     const onDoubleTap = () => {
@@ -128,31 +125,6 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
 
         tikRef.current.pauseAsync();
     };
-
-    const playVideoAsync = () => {
-        if (!tikRef.current) {
-            return
-        }
-
-        tikRef.current.playAsync()
-        playButtonScale.value = false
-    }
-    
-    // auto play video if in view
-    useEffect(() => {
-        if(!tikRef.current) return
-
-        if(activeUserId !== user.id){
-            tikRef.current.pauseAsync()
-            playButtonScale.value = true
-        }
-
-        if(activeUserId === user.id) {
-            tikRef.current.playAsync()
-            playButtonScale.value = false
-        }
-
-    }, [activeUserId, tikRef.current])
 
     // go to next story 
     const next = () => {
@@ -190,43 +162,26 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
             }
         })
 
-    // play button scale animation
-    const playButtonScaleAnimatedStyle = useAnimatedStyle(() => ({
-        transform: [
-            {scale: withDelay(1000, withTiming(interpolate(
-                    playButtonScale.value,
-                    [false, true],
-                    [0, 1]
-                )))
-            }
-        ]
-    }))
-
 
     {/*** Update stories indicator progress on current index and user id change */}
     useEffect(() => {
-        // console.log(user.stories[currentIndex])
-        console.log(currentIndex)
-        if (user.stories[currentIndex].storyType === "video"){
-            durationMillis = status?.durationMillis // total play time  for video
-            positionMillis = status?.positionMillis // play progress level for video
-            // console.log("\n~~~~~~~ Stating brand new VIDEO log ~~~~~~~~\n")
-            // console.log("position millis: ", positionMillis)
-            // console.log("duration millis: ", durationMillis)
-            // console.log("progress: ", progress.value)
-            if(durationMillis === undefined || positionMillis === undefined){
-                console.log("undefined: durationMillis - positionMillis\n", durationMillis, " - ", positionMillis)
-                progress.value = 0
-            }else {
-                console.log("defined: durationMillis - positionMillis\n", durationMillis, " - ", positionMillis)
-                progress.value = (positionMillis / durationMillis)
-            }
-        }else if (user.stories[currentIndex].storyType === "photo") {
-            console.log("\n~~~~~~~ Stating brand new PHOTO log ~~~~~~~~\n")
+        if(user.stories[currentIndex].storyType === "video"){
+            console.log("~~~~ Video in View ~~~~")
+            console.log("video progress: ", videoProgress)
+            progress.value = withTiming(videoProgress, {
+                duration: 1000,
+                easing: Easing.linear
+            })
+        } else if (user.stories[currentIndex].storyType === "image") {
+            console.log("~~~~~~~ Photo In View ~~~~~~~~")
+            setVideoProgress(prev => 0)
             progress.value = 0
-            progress.value = 1
+            progress.value = withTiming(1, {
+                duration: 10 * 1000,
+                easing: Easing.linear
+            })
         }
-    }, [currentIndex, activeUserId, status])
+    }, [currentIndex, activeUserId, videoProgress])
 
     {/** update stories indicator progress based on playback.didJustFinished */}
     const updateProgressValueToOne = () => progress.value = 1
@@ -234,10 +189,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     // status indicator with animation
     const statusIndicatorAnimatedStyle = useAnimatedStyle(() => {
         return {
-            width: withTiming(`${progress.value * 100}%`, {
-                duration: user.stories[currentIndex].storyType === "video"? 1000: 10 * 1000,
-                easing: Easing.linear
-            })
+            width: `${progress.value * 100}%`
         }
     })
 
@@ -245,14 +197,14 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     useAnimatedReaction(
         () => progress.value,
         (currentProgress, prevProgress) => {
-            if(prevProgress !== currentProgress && progress.value && progress.value === 1 ) {
+            if(prevProgress !== currentProgress && progress.value && progress.value === 1 && currentIndex !== user.stories.length - 1 ) {
                 runOnJS(next)()
-                progress.value = 0
-                positionMillis = 0
-                durationMillis = 0
             }
         }
     )
+
+    // global toggle play and pause icon function
+    const togglePlayAndPause = (value) => playButtonScale.value = value
 
 
     const tapGestures = Gesture.Exclusive(doubleTap, singleTap)
@@ -277,7 +229,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
                 ))}
             </View>
             <LinearGradient
-                colors={["#00000095", "transparent", "transparent", "transparent", "transparent", "#00000095"]}
+                colors={["#000000ca", "transparent", "transparent", "transparent", "#000000"]}
                 style={styles.overlay}
             />
             <View style={styles.headerIcons}>
@@ -311,9 +263,15 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
                     <VideoPlayer 
                         playerRef={tikRef}
                         source={user.stories[currentIndex].source}
-                        setStatus={setStatus}
+                        // setStatus={setStatus}
                         isLoading={vidIsLoading}
                         setIsLoading={setVidIsLoading}
+                        activeUserId={activeUserId}
+                        user={user}
+                        currentIndex={currentIndex}
+                        playButtonScale={playButtonScale}
+                        togglePlayAndPause={togglePlayAndPause}
+                        setVideoProgress={setVideoProgress}
                         updateProgressValueToOne={updateProgressValueToOne}
                         profile={<Profile 
                             name={user.name} 
@@ -323,22 +281,6 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
                             type="video" 
                         />}
                     />
-
-                    {/** play icon */}
-                    <Animated.View style={[styles.play, playButtonScaleAnimatedStyle]}>
-                    <TouchableOpacity
-                        onPress={playVideoAsync}
-                    >
-                        {playButtonScale.value ?(
-                            <FontAwesome5 size={24} name="play" color="#fff" />
-                        ): (
-                            <FontAwesome5 size={24} name="pause" color="#fff" />
-                        )
-
-                        }
-                    </TouchableOpacity>
-
-                    </Animated.View>
                 </>
                 ) :
 
