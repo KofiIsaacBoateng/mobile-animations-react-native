@@ -1,5 +1,6 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native'
 import React, {useEffect, useState} from 'react'
+import { LinearGradient } from 'expo-linear-gradient'
 import { Video, ResizeMode } from 'expo-av'
 import Loading from './Loading'
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
@@ -18,13 +19,38 @@ import
     Easing
 } from 'react-native-reanimated'
 
+const {height, width} = Dimensions.get("window")
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1, 
+    zIndex: -1
+  },
     video: {
         width: "100%",
         height: "100%",
         zIndex: -1
     },
+
+    overlay: {
+      height, 
+      width,
+      position: "absolute",
+      left: 0,
+      top: 0,
+      zIndex: 1
+  },
+
+  bottom: {
+    position: "absolute",
+    bottom: 20,
+    left: 0,
+    right: 0,
+    height: "auto",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    zIndex: 2
+}
 })
 
 const VideoPlayer = ({
@@ -131,7 +157,13 @@ const VideoPlayer = ({
     
 
   return (
-    <View style={{flex: 1}}>
+    <View style={styles.container}>
+
+        {/** gradient overlay  */}
+        <LinearGradient
+          colors={["#000000aa", "transparent", "transparent", "transparent", "#000000c2"]}
+          style={styles.overlay}
+        />
         <Video
             ref = {playerRef}
             source={source}
@@ -142,7 +174,9 @@ const VideoPlayer = ({
             progressUpdateIntervalMillis={800}
             onPlaybackStatusUpdate={onPlaybackStatusUpdate}
         />
-        {profile}
+        <View style={styles.bottom}>
+          {profile}
+        </View>
 
         {/** play icon */}
         <Animated.View style={[styles.play, playButtonScaleAnimation]}>

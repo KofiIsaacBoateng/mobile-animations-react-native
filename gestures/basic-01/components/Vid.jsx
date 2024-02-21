@@ -1,6 +1,5 @@
 import { Dimensions, StyleSheet, Text, View, Pressable, Image } from 'react-native'
 import React, { useEffect, useState, useRef }  from 'react'
-import { LinearGradient } from 'expo-linear-gradient'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -36,15 +35,6 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
 
-    overlay: {
-        height, 
-        width,
-        position: "absolute",
-        left: 0,
-        top: 0,
-        zIndex: 0
-    },
-
     headerIcons: {
         position: "absolute",
         top: 20,
@@ -75,7 +65,7 @@ const styles = StyleSheet.create({
     },
 
     indicatorBackground: {
-        height: 3,
+        height: 1.5,
         flexGrow: 1,
         backgroundColor: "#aaa5",
     },
@@ -83,7 +73,7 @@ const styles = StyleSheet.create({
     indicator: {
         height: "100%",
         width: "0%",
-        backgroundColor: "#fff6"
+        backgroundColor: "#fffc"
     },
 
     play: {
@@ -190,7 +180,10 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
             console.log("~~~~~~~ Photo In View ~~~~~~~~")
             setVideoProgress(prev => 0)
             mprogress.value = 0
-            mprogress.value = 1
+            mprogress.value = withTiming(1, {
+                duration: 10 * 1000,
+                easing: Easing.linear
+            })
         }
     }, [activeUserId, currentIndex])
 
@@ -208,10 +201,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
             }
         }else if (currentStory.storyType === "image") {
             return {
-                width: withTiming(`${mprogress.value * 100}%`, {
-                    duration: 10 * 1000,
-                    easing: Easing.linear
-                })
+                width: `${mprogress.value * 100}%`
             }
         }
     })
@@ -260,30 +250,28 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
                     </View>
                 ))}
             </View>
-            <LinearGradient
-                colors={["#000000ca", "transparent", "transparent", "transparent", "#000000"]}
-                style={styles.overlay}
-            />
+
+
             <View style={styles.headerIcons}>
                 <TouchableOpacity
                     onPress={ () => navigation.navigate("Drawer", {screen: "TapGesture"})}
                     style={styles.backBtn}
                 >
-                    <MaterialIcons name="keyboard-arrow-left"  size={32} color="#fff9" />
+                    <MaterialIcons name="keyboard-arrow-left"  size={32} color="#fff" />
                 </TouchableOpacity>
                 <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
                     <TouchableOpacity
                         onPress={ () => null}
                         style={[styles.backBtn, {marginLeft: "auto"}]}
                     >
-                        <EvilIcons name="search"  size={38} color="#fff9" />
+                        <EvilIcons name="search"  size={30} color="#fff" />
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         onPress={ () => null}
                         style={styles.backBtn}
                     >
-                        <MaterialCommunityIcons name="dots-vertical"  size={32} color="#fff9" />
+                        <MaterialCommunityIcons name="dots-vertical"  size={27} color="#fff" />
                     </TouchableOpacity>
                 </View>
             </View>
