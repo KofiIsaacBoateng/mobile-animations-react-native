@@ -83,15 +83,6 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     const mprogress = useSharedValue(0)
     const [videoProgress, setVideoProgress] = useState(0) 
 
-    // double tap function to play or pause video
-    const onDoubleTap = () => {
-        if (!tikRef.current) {
-            return;
-        }
-
-        tikRef.current.pauseAsync();
-    };
-
     // go to next story 
     const next = () => {
         setCurrentIndex(prev => prev >= user.stories.length - 1 ? user.stories.length - 1 : currentIndex + 1 )
@@ -107,28 +98,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     }
 
 
-    // double tap gesture to pause video
-    const doubleTap = Gesture.Tap().numberOfTaps(2)
-        .onEnd((_e, success) => {
-            if(success){ 
-                // console.log("double tapped")
-                runOnJS(onDoubleTap)()
-                playButtonScale.value = true
-            }
-        })
 
-    // single tap gesture to update current story
-    const singleTap = Gesture.Tap()
-        .onEnd((_e, success) => {
-            // console.log("single tapped")
-            if(success) {
-                if (_e.x > width / 2){
-                    runOnJS(next)()
-                }else {
-                    runOnJS(back)()
-                }
-            }
-        })
 
 
     {/** update current story on index change */}
@@ -185,95 +155,94 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     // global toggle play and pause icon function
     const togglePlayAndPause = (value) => playButtonScale.value = value
 
-
-    const tapGestures = Gesture.Exclusive(doubleTap, singleTap)
-
   return (
-    <GestureDetector gesture={tapGestures}>
-        <View style={styles.tik}>
-            <View style={styles.statusIndicators} >
-                {user.stories.map((story, index) => (
-                    <View key = {`${index}-${story.source}`} style={styles.indicatorBackground}>
-                        {(index < currentIndex) ? (
-                                <View style={[styles.indicator, {width: "100%"}]} />
-                            ): (index > currentIndex) ? (
-                                <View style={[styles.indicator, {width: 0}]} />
-                            ): (
-                                <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle]} />
-                            )
-                        }
+    <View style={styles.tik}>
+        <View style={styles.statusIndicators} >
+            {user.stories.map((story, index) => (
+                <View key = {`${index}-${story.source}`} style={styles.indicatorBackground}>
+                    {(index < currentIndex) ? (
+                            <View style={[styles.indicator, {width: "100%"}]} />
+                        ): (index > currentIndex) ? (
+                            <View style={[styles.indicator, {width: 0}]} />
+                        ): (
+                            <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle]} />
+                        )
+                    }
 
-                    </View>
-                ))}
-            </View>
+                </View>
+            ))}
+        </View>
 
 
-            <View style={styles.headerIcons}>
+        <View style={styles.headerIcons}>
+            <TouchableOpacity
+                onPress={ () => navigation.navigate("Drawer", {screen: "TapGesture"})}
+                style={styles.backBtn}
+            >
+                <MaterialIcons name="keyboard-arrow-left"  size={32} color="#fff" />
+            </TouchableOpacity>
+            <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
                 <TouchableOpacity
-                    onPress={ () => navigation.navigate("Drawer", {screen: "TapGesture"})}
+                    onPress={ () => null}
+                    style={[styles.backBtn, {marginLeft: "auto"}]}
+                >
+                    <EvilIcons name="search"  size={30} color="#fff" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={ () => null}
                     style={styles.backBtn}
                 >
-                    <MaterialIcons name="keyboard-arrow-left"  size={32} color="#fff" />
+                    <MaterialCommunityIcons name="dots-vertical"  size={27} color="#fff" />
                 </TouchableOpacity>
-                <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
-                    <TouchableOpacity
-                        onPress={ () => null}
-                        style={[styles.backBtn, {marginLeft: "auto"}]}
-                    >
-                        <EvilIcons name="search"  size={30} color="#fff" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        onPress={ () => null}
-                        style={styles.backBtn}
-                    >
-                        <MaterialCommunityIcons name="dots-vertical"  size={27} color="#fff" />
-                    </TouchableOpacity>
-                </View>
             </View>
+        </View>
 
-            {/** Video Player and Image Display */}
+        {/** Video Player and Image Display */}
 
-            {user.stories[currentIndex].storyType === "video" ? (
-                <>
-                    <VideoPlayer 
-                        playerRef={tikRef}
-                        source={user.stories[currentIndex].source}
-                        setStatus={setStatus}
-                        status={status}
-                        isLoading={vidIsLoading}
-                        setIsLoading={setVidIsLoading}
-                        activeUserId={activeUserId}
-                        user={user}
-                        currentIndex={currentIndex}
-                        playButtonScale={playButtonScale}
-                        togglePlayAndPause={togglePlayAndPause}
-                        setVideoProgress={setVideoProgress}
-                        updateProgressValueToOne={updateProgressValueToOne}
-                        profile={<Profile 
-                            name={user.name} 
-                            username={user.username} 
-                            profilePhotoUrl={user.profilePhotoUrl}
-                            description={user.stories[currentIndex].storyType}
-                            type="video" 
-                        />}
-                    />
-                </>
-                ) :
-
-                <ImageDisplay 
+        {user.stories[currentIndex].storyType === "video" ? (
+            <>
+                <VideoPlayer 
+                    playerRef={tikRef}
                     source={user.stories[currentIndex].source}
+                    setStatus={setStatus}
+                    status={status}
+                    isLoading={vidIsLoading}
+                    setIsLoading={setVidIsLoading}
+                    activeUserId={activeUserId}
+                    user={user}
+                    currentIndex={currentIndex}
+                    playButtonScale={playButtonScale}
+                    togglePlayAndPause={togglePlayAndPause}
+                    setVideoProgress={setVideoProgress}
+                    updateProgressValueToOne={updateProgressValueToOne}
+                    next={next}
+                    back={back}
                     profile={<Profile 
                         name={user.name} 
                         username={user.username} 
                         profilePhotoUrl={user.profilePhotoUrl}
                         description={user.stories[currentIndex].storyType}
-                        type="image"
+                        type="video" 
                     />}
                 />
-            }
-        </View>
-    </GestureDetector>
+            </>
+            ) :
+
+            <ImageDisplay 
+                source={user.stories[currentIndex].source}
+                next={next}
+                back={back}
+                profile={<Profile 
+                    name={user.name} 
+                    username={user.username} 
+                    profilePhotoUrl={user.profilePhotoUrl}
+                    description={user.stories[currentIndex].storyType}
+                    type="image"
+                />}
+            />
+        }
+    </View>
   )
 }
 

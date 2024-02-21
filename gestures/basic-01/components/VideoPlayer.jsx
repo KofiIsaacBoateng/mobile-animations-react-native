@@ -7,14 +7,17 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 
 
 
-// animation and gesture imports 
+// animation and gesture imports
+import { GestureDetector, Gesture } from 'react-native-gesture-handler'
+
 import 
   Animated, 
   {
     useAnimatedStyle, 
     withTiming, 
     withDelay,
-    Easing
+    Easing,
+    runOnJS
 } from 'react-native-reanimated'
 
 const {height, width} = Dimensions.get("window")
@@ -77,7 +80,9 @@ const VideoPlayer = ({
   playButtonScale,
   togglePlayAndPause,
   status,
-  setStatus
+  setStatus,
+  next,
+  back
 }) => {
     const isPlaying = status.isPlaying ? true: false
 
@@ -166,16 +171,52 @@ const VideoPlayer = ({
           }
       ]
     }))
-    
+
+
+    // double tap function to play or pause video
+    const onDoubleTap = () => {
+      if (!tikRef.current) {
+          return;
+      }
+
+      tikRef.current.pauseAsync();
+    };
+  
+    // double tap gesture to pause video
+    const doubleTap = Gesture.Tap().numberOfTaps(2)
+    .onEnd((_e, success) => {
+        if(success){ 
+            // console.log("double tapped")
+            runOnJS(onDoubleTap)()
+            playButtonScale.value = true
+        }
+    })
+
+    // single tap gesture to update current story
+    const singleTap = Gesture.Tap()
+        .onEnd((_e, success) => {
+            // console.log("single tapped")
+            if(success) {
+                if (_e.x > width / 2){
+                    runOnJS(next)()
+                }else {
+                    runOnJS(back)()
+                }
+            }
+    })
+
+    const tapGestures = Gesture.Exclusive(doubleTap, singleTap)
 
   return (
     <View style={styles.container}>
 
         {/** gradient overlay  */}
-        <LinearGradient
-          colors={["#000000aa", "transparent", "transparent", "transparent", "#000000c2"]}
-          style={styles.overlay}
-        />
+        <GestureDetector gesture={tapGestures}>
+          <LinearGradient
+            colors={["#000000aa", "transparent", "transparent", "transparent", "#000000c2"]}
+            style={styles.overlay}
+          />
+        </GestureDetector>
         <Video
             ref = {playerRef}
             source={source}
