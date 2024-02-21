@@ -215,16 +215,15 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
             <View style={styles.statusIndicators} >
                 {user.stories.map((story, index) => (
                     <View key = {`${index}-${story.source}`} style={styles.indicatorBackground}>
-                        <Animated.View 
-                            style={[
-                                styles.indicator,
-                                (currentIndex > index) ? 
-                                        {width: "100%"} : 
-                                    (currentIndex < index) ? 
-                                        {width: "0%"} :
-                                    statusIndicatorAnimatedStyle,
-                            ]} 
-                        />
+                        {(index < currentIndex) ? (
+                                <View style={[styles.indicator, {width: "100%"}]} />
+                            ): (index > currentIndex) ? (
+                                <View style={[styles.indicator, {width: 0}]} />
+                            ): (
+                                <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle]} />
+                            )
+                        }
+
                     </View>
                 ))}
             </View>
