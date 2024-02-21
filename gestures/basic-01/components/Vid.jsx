@@ -3,14 +3,11 @@ import React, { useEffect, useState, useRef }  from 'react'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
-import AntDesign from 'react-native-vector-icons/AntDesign'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { useNavigation } from '@react-navigation/native'
 import VideoPlayer from './VideoPlayer'
 import ImageDisplay from './ImageDisplay'
 import Profile from './Profile'
-import updates from '../assets/updates'
 
 
 // gesture and animation imports 
@@ -19,11 +16,8 @@ import Animated, {
     runOnJS, 
     useAnimatedStyle, 
     useSharedValue, 
-    withDelay, 
     withTiming, 
-    interpolate, 
     Easing,
-    useAnimatedReaction
 } from 'react-native-reanimated'
 
 
@@ -91,19 +85,9 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
 
     // double tap function to play or pause video
     const onDoubleTap = () => {
-        // console.log("onDoubleTap() called");
         if (!tikRef.current) {
-            // console.log("tikRef.current is null");
             return;
         }
-    
-        // if (isPlaying) {
-        //     console.log("Pausing the video");
-        //     tikRef.current.pauseAsync();
-        // } else {
-        //     console.log("Playing the video");
-        //     tikRef.current.playAsync();
-        // }
 
         tikRef.current.pauseAsync();
     };
@@ -112,12 +96,14 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     const next = () => {
         setCurrentIndex(prev => prev >= user.stories.length - 1 ? user.stories.length - 1 : currentIndex + 1 )
         setVideoProgress(prev => 0)
+        vprogress.value = 0
     }
 
     // go to prev story 
     const back = () => {
         setCurrentIndex(prev => prev <= 0 ? 0 : prev - 1 )
         setVideoProgress(prev => 0)
+        vprogress.value = 0
     }
 
 
@@ -194,25 +180,6 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
             }
         }
     })
-
-    // watching progress to automate the playing the next story when done
-        // useAnimatedReaction(
-        //     () => vprogress.value,
-        //     (currentProgress, prevProgress) => {
-        //         if(prevProgress !== currentProgress && vprogress.value && vprogress.value === 1 && currentIndex !== user.stories.length - 1 ) {
-        //             runOnJS(next)()
-        //         }
-        //     }
-        // )
-
-        // useAnimatedReaction(
-        //     () => mprogress.value,
-        //     (currentProgress, prevProgress) => {
-        //         if(prevProgress !== currentProgress && mprogress.value && mprogress.value === 1 && currentIndex !== user.stories.length - 1 ) {
-        //             runOnJS(next)()
-        //         }
-        //     }
-        // )
 
 
     // global toggle play and pause icon function

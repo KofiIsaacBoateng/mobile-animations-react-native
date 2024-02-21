@@ -53,7 +53,7 @@ const ImageDisplay = ({source, profile}) => {
         <Image
             source={source}
             style={styles.underlay}
-            blurRadius={500}
+            blurRadius={100}
         />
         <Image 
             source={source}

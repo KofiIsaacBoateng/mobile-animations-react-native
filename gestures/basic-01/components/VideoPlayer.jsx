@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native'
-import React, {useEffect, useState} from 'react'
+import React, {useEffect} from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Video, ResizeMode } from 'expo-av'
 import Loading from './Loading'
@@ -12,10 +12,8 @@ import
   Animated, 
   {
     useAnimatedStyle, 
-    useDerivedValue,
     withTiming, 
     withDelay,
-    interpolate,
     Easing
 } from 'react-native-reanimated'
 
@@ -152,8 +150,10 @@ const VideoPlayer = ({
       }
 
       
-      playerRef.current.playAsync()
-      togglePlayAndPause(false)
+      if(activeUserId === user.id) {
+        playerRef.current.playAsync()
+        togglePlayAndPause(false)
+      }
     }
   
 
@@ -183,7 +183,7 @@ const VideoPlayer = ({
             resizeMode={ResizeMode.CONTAIN}
             isLooping={true}
             isMuted={true}
-            progressUpdateIntervalMillis={500}
+            progressUpdateIntervalMillis={600}
             onPlaybackStatusUpdate={onPlaybackStatusUpdate}
         />
         <View style={styles.bottom}>
