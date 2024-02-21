@@ -39,9 +39,10 @@ const VideoPlayer = ({
   setVideoProgress,
   updateProgressValueToOne,
   playButtonScale,
-  togglePlayAndPause
+  togglePlayAndPause,
+  status,
+  setStatus
 }) => {
-    const [status, setStatus ] = useState({})
     const isPlaying = status.isPlaying ? true: false
 
     // auto play video if in view
@@ -138,7 +139,7 @@ const VideoPlayer = ({
             resizeMode={ResizeMode.CONTAIN}
             isLooping={false}
             isMuted={true}
-            progressUpdateIntervalMillis={1000}
+            progressUpdateIntervalMillis={800}
             onPlaybackStatusUpdate={onPlaybackStatusUpdate}
         />
         {profile}

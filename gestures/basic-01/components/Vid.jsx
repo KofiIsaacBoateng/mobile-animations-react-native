@@ -101,11 +101,14 @@ const styles = StyleSheet.create({
 
 const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     const navigation = useNavigation()
+    const [status, setStatus ] = useState({})
+    const [currentStory, setCurrentStory] = useState(user.stories[currentIndex])
     const [vidIsLoading, setVidIsLoading] = useState(false)
     const tikRef = useRef(null)
     const playButtonScale = useSharedValue(false)
-    const progress = useSharedValue(0)
-    const [videoProgress, setVideoProgress] = useState(0)
+    const vprogress = useSharedValue(0)
+    const mprogress = useSharedValue(0)
+    const [videoProgress, setVideoProgress] = useState(0) 
 
     // double tap function to play or pause video
     const onDoubleTap = () => {
@@ -129,13 +132,13 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     // go to next story 
     const next = () => {
         setCurrentIndex(prev => prev >= user.stories.length - 1 ? user.stories.length - 1 : currentIndex + 1 )
-        progress.value = 0
+        setVideoProgress(prev => 0)
     }
 
     // go to prev story 
     const back = () => {
         setCurrentIndex(prev => prev <= 0 ? 0 : prev - 1 )
-        progress.value = 0
+        setVideoProgress(prev => 0)
     }
 
 
@@ -163,45 +166,75 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
         })
 
 
-    {/*** Update stories indicator progress on current index and user id change */}
+    {/** update current story on index change */}
+    useEffect(() => {
+        setCurrentStory(prev => user.stories[currentIndex])
+    }, [currentIndex])
+
+
+    {/*** Update video story indicator progress on current index and user id change */}
     useEffect(() => {
         if(user.stories[currentIndex].storyType === "video"){
             console.log("~~~~ Video in View ~~~~")
-            console.log("video progress: ", videoProgress)
-            progress.value = withTiming(videoProgress, {
+            vprogress.value = withTiming(videoProgress, {
                 duration: 1000,
                 easing: Easing.linear
             })
-        } else if (user.stories[currentIndex].storyType === "image") {
+            console.log("video progress: ", vprogress.value)
+        }
+    }, [currentIndex, activeUserId, status])
+
+    {/*** update photo story indicator progress on current index or user id change */}
+    useEffect(() => {
+        if (user.stories[currentIndex].storyType === "image") {
             console.log("~~~~~~~ Photo In View ~~~~~~~~")
             setVideoProgress(prev => 0)
-            progress.value = 0
-            progress.value = withTiming(1, {
-                duration: 10 * 1000,
-                easing: Easing.linear
-            })
+            mprogress.value = 0
+            mprogress.value = 1
         }
-    }, [currentIndex, activeUserId, videoProgress])
+    }, [activeUserId, currentIndex])
 
     {/** update stories indicator progress based on playback.didJustFinished */}
-    const updateProgressValueToOne = () => progress.value = 1
+    const updateProgressValueToOne = () => {
+        vprogress.value = 1
+        setVideoProgress(prev => 0)
+    }
 
     // status indicator with animation
     const statusIndicatorAnimatedStyle = useAnimatedStyle(() => {
-        return {
-            width: `${progress.value * 100}%`
+        if (currentStory.storyType === "video"){
+            return {
+                width: `${vprogress.value * 100}%`
+            }
+        }else if (currentStory.storyType === "image") {
+            return {
+                width: withTiming(`${mprogress.value * 100}%`, {
+                    duration: 10 * 1000,
+                    easing: Easing.linear
+                })
+            }
         }
     })
 
     // watching progress to automate the playing the next story when done
-    useAnimatedReaction(
-        () => progress.value,
-        (currentProgress, prevProgress) => {
-            if(prevProgress !== currentProgress && progress.value && progress.value === 1 && currentIndex !== user.stories.length - 1 ) {
-                runOnJS(next)()
-            }
-        }
-    )
+        // useAnimatedReaction(
+        //     () => vprogress.value,
+        //     (currentProgress, prevProgress) => {
+        //         if(prevProgress !== currentProgress && vprogress.value && vprogress.value === 1 && currentIndex !== user.stories.length - 1 ) {
+        //             runOnJS(next)()
+        //         }
+        //     }
+        // )
+
+        // useAnimatedReaction(
+        //     () => mprogress.value,
+        //     (currentProgress, prevProgress) => {
+        //         if(prevProgress !== currentProgress && mprogress.value && mprogress.value === 1 && currentIndex !== user.stories.length - 1 ) {
+        //             runOnJS(next)()
+        //         }
+        //     }
+        // )
+
 
     // global toggle play and pause icon function
     const togglePlayAndPause = (value) => playButtonScale.value = value
@@ -262,7 +295,8 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
                     <VideoPlayer 
                         playerRef={tikRef}
                         source={user.stories[currentIndex].source}
-                        // setStatus={setStatus}
+                        setStatus={setStatus}
+                        status={status}
                         isLoading={vidIsLoading}
                         setIsLoading={setVidIsLoading}
                         activeUserId={activeUserId}
