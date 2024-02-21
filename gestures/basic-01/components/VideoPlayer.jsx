@@ -139,7 +139,7 @@ const VideoPlayer = ({
 
       if(playbackStatus.disJustFinished){
         updateProgressValueToOne()
-        togglePlayAndPause(true)
+        // togglePlayAndPause(true)
       }
 
     }
@@ -151,7 +151,8 @@ const VideoPlayer = ({
           return
       }
 
-      playerRef.current.replayAsync()
+      
+      playerRef.current.playAsync()
       togglePlayAndPause(false)
     }
   
@@ -159,11 +160,9 @@ const VideoPlayer = ({
     // play button scale animation
     const playButtonScaleAnimation = useAnimatedStyle(() => ({
       transform: [
-          {scale: withDelay(1000, withTiming(interpolate(
-                  playButtonScale.value,
-                  [false, true],
-                  [0, 1]
-              )))
+          {scale: playButtonScale.value === true ?(
+            withTiming(1, {duration: 100, easing: Easing.bounce})
+          ): (withDelay(1000, withTiming(0, {duration: 100, easing: Easing.bounce})))
           }
       ]
     }))
@@ -182,7 +181,7 @@ const VideoPlayer = ({
             source={source}
             style={styles.video}
             resizeMode={ResizeMode.CONTAIN}
-            isLooping={false}
+            isLooping={true}
             isMuted={true}
             progressUpdateIntervalMillis={500}
             onPlaybackStatusUpdate={onPlaybackStatusUpdate}
