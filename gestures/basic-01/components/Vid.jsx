@@ -76,17 +76,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#fffc"
     },
 
-    play: {
-        width: 70,
-        height: 70,
-        borderRadius: 100,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#00000075",
-        position: "absolute",
-        alignSelf: "center",
-    }
-
 })
 
 const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
@@ -167,7 +156,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
         if(user.stories[currentIndex].storyType === "video"){
             console.log("~~~~ Video in View ~~~~")
             vprogress.value = withTiming(videoProgress, {
-                duration: 1000,
+                duration: 500,
                 easing: Easing.linear
             })
             console.log("video progress: ", vprogress.value)

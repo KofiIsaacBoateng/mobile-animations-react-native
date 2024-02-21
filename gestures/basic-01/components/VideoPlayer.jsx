@@ -24,7 +24,8 @@ const {height, width} = Dimensions.get("window")
 const styles = StyleSheet.create({
   container: {
     flex: 1, 
-    zIndex: -1
+    zIndex: -1,
+    justifyContent: "center"
   },
     video: {
         width: "100%",
@@ -50,7 +51,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     zIndex: 2
-}
+  },
+  play: {
+    width: 70,
+    height: 70,
+    borderRadius: 100,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#00000075",
+    position: "absolute",
+    alignSelf: "center",
+    zIndex: 3
+  }
 })
 
 const VideoPlayer = ({
@@ -127,6 +139,7 @@ const VideoPlayer = ({
 
       if(playbackStatus.disJustFinished){
         updateProgressValueToOne()
+        togglePlayAndPause(true)
       }
 
     }
@@ -134,12 +147,12 @@ const VideoPlayer = ({
 
     // manually play video
     const playVideoAsync = () => {
-      if (!tikRef.current) {
+      if (!playerRef.current) {
           return
       }
 
-      tikRef.current.playAsync()
-      togglePlayAndPause(true)
+      playerRef.current.replayAsync()
+      togglePlayAndPause(false)
     }
   
 
@@ -171,7 +184,7 @@ const VideoPlayer = ({
             resizeMode={ResizeMode.CONTAIN}
             isLooping={false}
             isMuted={true}
-            progressUpdateIntervalMillis={800}
+            progressUpdateIntervalMillis={500}
             onPlaybackStatusUpdate={onPlaybackStatusUpdate}
         />
         <View style={styles.bottom}>
