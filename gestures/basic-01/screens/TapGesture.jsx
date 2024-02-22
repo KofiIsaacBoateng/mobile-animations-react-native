@@ -127,19 +127,15 @@ const TapGesture = () => {
         />
         <Text style={{fontSize: 45, color: "#0c0d3466", fontWeight: "900", marginVertical: "auto"}}>Tap Any</Text>
       </View>
-      {inView && (
         <GestureDetector gesture={flingRight}>
         <Animated.View style={[styles.tikreels, storiesPopUpAnimatedStyle]}>
-          <TikReels 
-            updateStoriesState={updateStoriesState} 
+          <TikReels
+            updateStoriesState={updateStoriesState}
             clickedIndex={clickedIndex}
             flingGesture={gesture}
           />
         </Animated.View>
       </GestureDetector>
-      )}
-      
-
     </>
   )
 }

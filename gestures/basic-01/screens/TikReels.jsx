@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet, FlatList, Text, View, Pressable } from 'react-native'
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import videos from "../assets/videos"
 import updates from "../assets/updates"
 import { ResizeMode, Video } from 'expo-av'
@@ -17,6 +17,7 @@ const styles = StyleSheet.create({
 const TikReels = ({updateStoriesState, clickedIndex}) => {
     const [activeUserId, setActiveUserId] = useState("")
     const [currentIndex, setCurrentIndex] = useState(0)
+    const reelsRef = useRef(null)
     const viewabilityConfigPairs = useRef([
         {
             viewabilityConfig: {itemVisiblePercentThreshold: "50"},
@@ -29,16 +30,22 @@ const TikReels = ({updateStoriesState, clickedIndex}) => {
         },
     ])
 
+    useEffect(() => {
+        if(!reelsRef.current) return
+
+        reelsRef.current.scrollToIndex({index: clickedIndex || 0, animated: true})
+    }, [clickedIndex])
+
   return (
     <View style={{flex: 1, backgroundColor: "#000"}}>
             <ExpoStatusBar hidden />
             <FlatList
+                ref={reelsRef}
                 data={updates}
                 style={[{height}]}
                 keyExtractor={(user, index) => user.id}
                 pagingEnabled={true}
                 bounces={true}
-                initialScrollIndex={clickedIndex}
                 getItemLayout={(data, index) => ({
                     length: height,
                     offset: height * index,
