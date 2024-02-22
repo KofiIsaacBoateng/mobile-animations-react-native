@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
 })
 
 
-const TikReels = () => {
+const TikReels = ({updateStoriesState, clickedIndex}) => {
     const [activeUserId, setActiveUserId] = useState("")
     const [currentIndex, setCurrentIndex] = useState(0)
     const viewabilityConfigPairs = useRef([
@@ -37,6 +37,7 @@ const TikReels = () => {
                 keyExtractor={(user, index) => user.id}
                 pagingEnabled={true}
                 bounces={true}
+                initialScrollIndex={clickedIndex}
                 showsVerticalScrollIndicator={false}
                 renderItem={({item, index}) => (
                     <Vid 
@@ -44,6 +45,7 @@ const TikReels = () => {
                         activeUserId={activeUserId}
                         currentIndex={currentIndex}
                         setCurrentIndex={setCurrentIndex}
+                        updateStoriesState={updateStoriesState}
                     />
                 )}
                 viewabilityConfigCallbackPairs={viewabilityConfigPairs.current}

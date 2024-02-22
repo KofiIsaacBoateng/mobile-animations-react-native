@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
 
 })
 
-const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
+const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStoriesState}) => {
     const navigation = useNavigation()
     const [status, setStatus ] = useState({})
     const [currentStory, setCurrentStory] = useState(user.stories[currentIndex])
@@ -110,19 +110,19 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
     {/*** Update video story indicator progress on current index and user id change */}
     useEffect(() => {
         if(user.stories[currentIndex].storyType === "video"){
-            console.log("~~~~ Video in View ~~~~")
+            // console.log("~~~~ Video in View ~~~~")
             vprogress.value = withTiming(videoProgress, {
                 duration: 500,
                 easing: Easing.linear
             })
-            console.log("video progress: ", vprogress.value)
+            // console.log("video progress: ", vprogress.value)
         }
     }, [currentIndex, activeUserId, status])
 
     {/*** update photo story indicator progress on current index or user id change */}
     useEffect(() => {
         if (user.stories[currentIndex].storyType === "image") {
-            console.log("~~~~~~~ Photo In View ~~~~~~~~")
+            // console.log("~~~~~~~ Photo In View ~~~~~~~~")
             setVideoProgress(prev => 0)
             mprogress.value = 0
             mprogress.value = withTiming(1, {
@@ -176,7 +176,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex}) => {
 
         <View style={styles.headerIcons}>
             <TouchableOpacity
-                onPress={ () => navigation.navigate("Drawer", {screen: "TapGesture"})}
+                onPress={ () => updateStoriesState(undefined)}
                 style={styles.backBtn}
             >
                 <MaterialIcons name="keyboard-arrow-left"  size={32} color="#fff" />

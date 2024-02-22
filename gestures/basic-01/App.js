@@ -20,7 +20,7 @@ const App = () => {
     <NavigationContainer>
         <GestureHandlerRootView style={{flex: 1}}>
           <Stack.Navigator
-            initialRouteName='Tikreels'
+            initialRouteName='Drawer'
             screenOptions={{
               header: () => null
             }}
@@ -36,7 +36,7 @@ const App = () => {
 
 const DrawerComponent = () => (
   <Drawer.Navigator
-    initialRouteName='StackedCards'
+    initialRouteName='TapGesture'
     drawerContent={DrawerContent}
     screenOptions={{
       header: () => null

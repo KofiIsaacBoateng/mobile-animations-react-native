@@ -111,10 +111,10 @@ const VideoPlayer = ({
         const positionMillis = status?.positionMillis // play progress level for video
 
         if(durationMillis === undefined || positionMillis === undefined){
-            console.log("undefined: durationMillis - positionMillis\n", durationMillis, " - ", positionMillis)
+            // console.log("undefined: durationMillis - positionMillis\n", durationMillis, " - ", positionMillis)
             setVideoProgress(prev => 0)
         }else {
-            console.log("defined: durationMillis - positionMillis\n", durationMillis, " - ", positionMillis)
+            // console.log("defined: durationMillis - positionMillis\n", durationMillis, " - ", positionMillis)
             setVideoProgress(prev => positionMillis / durationMillis)
         }
     }, [status, activeUserId, currentIndex])
@@ -175,11 +175,11 @@ const VideoPlayer = ({
 
     // double tap function to play or pause video
     const onDoubleTap = () => {
-      if (!tikRef.current) {
+      if (!playerRef.current) {
           return;
       }
 
-      tikRef.current.pauseAsync();
+      playerRef.current.pauseAsync();
     };
   
     // double tap gesture to pause video
