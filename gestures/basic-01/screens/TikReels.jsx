@@ -1,14 +1,11 @@
-import { Dimensions, StyleSheet, FlatList, Text, View, Pressable } from 'react-native'
+import { Dimensions, StyleSheet, FlatList, View } from 'react-native'
 import React, { useRef, useState, useEffect } from 'react'
-import videos from "../assets/videos"
 import updates from "../assets/updates"
-import { ResizeMode, Video } from 'expo-av'
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar'
 import Vid from '../components/Vid'
-import Animated from 'react-native-reanimated'
 
 
-const {width, height} = Dimensions.get("window")
+const {height} = Dimensions.get("window")
 const styles = StyleSheet.create({
     
 })
@@ -18,6 +15,7 @@ const TikReels = ({updateStoriesState, clickedIndex}) => {
     const [activeUserId, setActiveUserId] = useState("")
     const [currentIndex, setCurrentIndex] = useState(0)
     const reelsRef = useRef(null)
+
     const viewabilityConfigPairs = useRef([
         {
             viewabilityConfig: {itemVisiblePercentThreshold: "50"},
@@ -37,7 +35,7 @@ const TikReels = ({updateStoriesState, clickedIndex}) => {
     }, [clickedIndex])
 
   return (
-    <View style={{flex: 1, backgroundColor: "#000"}}>
+    <View style={{flex: 1, backgroundColor: "#000"}} >
             <ExpoStatusBar hidden />
             <FlatList
                 ref={reelsRef}

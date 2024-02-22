@@ -5,10 +5,10 @@ import TikReels from './TikReels'
 
 
 {/*** animation and gesture imports */}
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming, interpolate, runOnJS } from 'react-native-reanimated'
+import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming, interpolate, Extrapolation } from 'react-native-reanimated'
 import { Directions, Gesture, GestureDetector, TouchableOpacity } from 'react-native-gesture-handler'
 
-const {width, height} = Dimensions.get("window")
+const {height} = Dimensions.get("window")
 
 const styles = StyleSheet.create({
   update: {
@@ -43,23 +43,48 @@ const styles = StyleSheet.create({
 const TapGesture = () => {
   const [clickedIndex, setClickedIndex] = useState(undefined)
   const storiesInView = useSharedValue(false)
-  const [inView, setInView] = useState(false)
+  const scale = useSharedValue(1)
+  const start = useSharedValue({
+    x: 0,
+    y: 0
+  })
+
+  const end = useSharedValue({
+    x: 0,
+    y: 0
+  })
 
   const updateStoriesState = (index) => {
     setClickedIndex(index)
     storiesInView.value = !storiesInView.value
-    setInView(prev => true)
+    scale.value = 1
     console.log("clicked index: ", clickedIndex)
   }
 
-
+  const storiesDragScaleAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          scale: withTiming(interpolate(
+            scale.value,
+            [0.5, 1],
+            [0.5, 1],
+            {
+              extrapolateLeft: Extrapolation.CLAMP,
+              extrapolateRight: Extrapolation.CLAMP
+            }
+            ), {duration: 300})
+        },
+      ]
+    }
+  })
   const storiesPopUpAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
         {scale: withTiming(interpolate(
-            storiesInView.value,
+          storiesInView.value,
             [false, true],
-            [0.4, 1]
+            [0.6, 1]
           ), {duration: 300})
         },
 
@@ -93,13 +118,60 @@ const TapGesture = () => {
   const flingRight = Gesture.Fling().direction(Directions.RIGHT)
     .onStart((_e) => {
       storiesInView.value = false
-      runOnJS(setInView) (false)
-      console.log("flung down")
+      // runOnJS(setInView) (false)
+      console.log("flung right")
     })
 
-  const Native = Gesture.Native()
 
-  const gesture = Gesture.Exclusive(Native, flingRight)
+    const flingLeft = Gesture.Fling().direction(Directions.LEFT)
+    .onStart((_e) => {
+      storiesInView.value = false
+      // runOnJS(setInView) (false)
+      console.log("flung left")
+    })
+
+
+  const drag = Gesture.Pan()
+    .onBegin((_e) => {
+      start.value = {
+        x: _e.translationX,
+        y: _e.translationY
+      }
+    })
+
+    .onUpdate((_e) => {
+      end.value = {
+        x: _e.translationX,
+        y: _e.translationX
+      }
+      scale.value = 1 - ((end.value.x - start.value.x) / 100) * 4
+      console.log(scale.value)
+    })
+    .onEnd((_e) =>{
+        if((end.value.x - start.value.x) < 100){
+          scale.value = 1
+          
+        }else {
+          storiesInView.value = false
+          scale.value = 0
+        }
+
+        end.value = {
+          x: 0,
+          y: 0
+        }
+        start.value = {
+          x: 0,
+          y: 0
+        }
+    }).minPointers(2)
+
+
+
+
+  const flingGestures = Gesture.Simultaneous(flingLeft, flingRight)
+
+  const gestures = Gesture.Exclusive(flingGestures, drag)
 
   return (
     <>
@@ -127,12 +199,11 @@ const TapGesture = () => {
         />
         <Text style={{fontSize: 45, color: "#0c0d3466", fontWeight: "900", marginVertical: "auto"}}>Tap Any</Text>
       </View>
-        <GestureDetector gesture={flingRight}>
-        <Animated.View style={[styles.tikreels, storiesPopUpAnimatedStyle]}>
+        <GestureDetector gesture={gestures}>
+        <Animated.View style={[styles.tikreels, storiesPopUpAnimatedStyle, storiesDragScaleAnimatedStyle]}>
           <TikReels
             updateStoriesState={updateStoriesState}
             clickedIndex={clickedIndex}
-            flingGesture={gesture}
           />
         </Animated.View>
       </GestureDetector>

@@ -63,6 +63,21 @@ const styles = StyleSheet.create({
         backgroundColor: "#aaa5",
     },
 
+    videoIndicator: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        flexDirection: "row",
+        gap: 5,
+        alignItems: "center",
+        justifyContent: "space-between",
+        width: width * 0.98,
+        marginLeft: width * 0.01,
+        height: 1.5,
+        alignSelf: "center",
+        zIndex: 5
+    },
+
     indicator: {
         height: "100%",
         width: "0%",
@@ -184,6 +199,9 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStorie
                         type="video" 
                     />}
                 />
+                <View style={[styles.indicatorBackground, styles.videoIndicator, ]}>
+                    <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle, {backgroundColor: "skyBlue"}]} />
+                </View>
             </>
             ) :
 
@@ -201,7 +219,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStorie
             />
         }
 
-<View style={styles.statusIndicators} >
+        <View style={styles.statusIndicators} >
             {user.stories.map((story, index) => (
                 <View key = {`${index}-${story.source}`} style={styles.indicatorBackground}>
                     {(index < currentIndex) ? (
