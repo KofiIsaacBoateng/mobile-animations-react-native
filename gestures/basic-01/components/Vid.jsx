@@ -11,7 +11,6 @@ import Profile from './Profile'
 
 
 // gesture and animation imports 
-import { GestureDetector, Gesture } from 'react-native-gesture-handler'
 import Animated, { 
     runOnJS, 
     useAnimatedStyle, 
@@ -33,7 +32,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 20,
         left: 0,
-        zIndex: 1,
+        zIndex: 2,
         flexDirection: "row",
         justifyContent: "space-between",
         paddingHorizontal: 10,
@@ -55,7 +54,7 @@ const styles = StyleSheet.create({
         width,
         height: 10,
         paddingHorizontal: 5,
-        zIndex: 1
+        zIndex: 5
     },
 
     indicatorBackground: {
@@ -73,7 +72,6 @@ const styles = StyleSheet.create({
 })
 
 const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStoriesState}) => {
-    const navigation = useNavigation()
     const [status, setStatus ] = useState({})
     const [currentStory, setCurrentStory] = useState(user.stories[currentIndex])
     const [vidIsLoading, setVidIsLoading] = useState(false)
@@ -157,46 +155,6 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStorie
 
   return (
     <View style={styles.tik}>
-        <View style={styles.statusIndicators} >
-            {user.stories.map((story, index) => (
-                <View key = {`${index}-${story.source}`} style={styles.indicatorBackground}>
-                    {(index < currentIndex) ? (
-                            <View style={[styles.indicator, {width: "100%"}]} />
-                        ): (index > currentIndex) ? (
-                            <View style={[styles.indicator, {width: 0}]} />
-                        ): (
-                            <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle]} />
-                        )
-                    }
-
-                </View>
-            ))}
-        </View>
-
-
-        <View style={styles.headerIcons}>
-            <TouchableOpacity
-                onPress={ () => updateStoriesState(undefined)}
-                style={styles.backBtn}
-            >
-                <MaterialIcons name="keyboard-arrow-left"  size={32} color="#fff" />
-            </TouchableOpacity>
-            <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
-                <TouchableOpacity
-                    onPress={ () => null}
-                    style={[styles.backBtn, {marginLeft: "auto"}]}
-                >
-                    <EvilIcons name="search"  size={30} color="#fff" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={ () => null}
-                    style={styles.backBtn}
-                >
-                    <MaterialCommunityIcons name="dots-vertical"  size={27} color="#fff" />
-                </TouchableOpacity>
-            </View>
-        </View>
 
         {/** Video Player and Image Display */}
 
@@ -242,6 +200,48 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStorie
                 />}
             />
         }
+
+<View style={styles.statusIndicators} >
+            {user.stories.map((story, index) => (
+                <View key = {`${index}-${story.source}`} style={styles.indicatorBackground}>
+                    {(index < currentIndex) ? (
+                            <View style={[styles.indicator, {width: "100%"}]} />
+                        ): (index > currentIndex) ? (
+                            <View style={[styles.indicator, {width: 0}]} />
+                        ): (
+                            <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle]} />
+                        )
+                    }
+
+                </View>
+            ))}
+        </View>
+
+        {/*** Header is at this position because their zIndex weren't somehow getting shown behind the images and videos */}
+        <View style={styles.headerIcons}>
+            <TouchableOpacity
+                onPress={ () => updateStoriesState(undefined)}
+                style={styles.backBtn}
+            >
+                <MaterialIcons name="keyboard-arrow-left"  size={32} color="#fff" />
+            </TouchableOpacity>
+            <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
+                <TouchableOpacity
+                    onPress={ () => null}
+                    style={[styles.backBtn, {marginLeft: "auto"}]}
+                >
+                    <EvilIcons name="search"  size={30} color="#fff" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={ () => null}
+                    style={styles.backBtn}
+                >
+                    <MaterialCommunityIcons name="dots-vertical"  size={27} color="#fff" />
+                </TouchableOpacity>
+            </View>
+        </View>
+
     </View>
   )
 }

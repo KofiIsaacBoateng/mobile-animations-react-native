@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     }
 })
 
-const ImageDisplay = ({source, profile, next, back, tikRef}) => {
+const ImageDisplay = ({source, profile, next, back}) => {
         // single tap gesture to update current story
     const singleTap = Gesture.Tap()
         .onEnd((_e, success) => {

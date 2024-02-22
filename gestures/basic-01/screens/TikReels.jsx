@@ -5,6 +5,7 @@ import updates from "../assets/updates"
 import { ResizeMode, Video } from 'expo-av'
 import ExpoStatusBar from 'expo-status-bar/build/ExpoStatusBar'
 import Vid from '../components/Vid'
+import Animated from 'react-native-reanimated'
 
 
 const {width, height} = Dimensions.get("window")
@@ -33,11 +34,16 @@ const TikReels = ({updateStoriesState, clickedIndex}) => {
             <ExpoStatusBar hidden />
             <FlatList
                 data={updates}
-                style={{}}
+                style={[{height}]}
                 keyExtractor={(user, index) => user.id}
                 pagingEnabled={true}
                 bounces={true}
                 initialScrollIndex={clickedIndex}
+                getItemLayout={(data, index) => ({
+                    length: height,
+                    offset: height * index,
+                    index
+                })}
                 showsVerticalScrollIndicator={false}
                 renderItem={({item, index}) => (
                     <Vid 

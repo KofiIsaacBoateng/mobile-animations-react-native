@@ -5,7 +5,7 @@ import TikReels from './TikReels'
 
 
 {/*** animation and gesture imports */}
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming, interpolate } from 'react-native-reanimated'
+import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming, interpolate, runOnJS } from 'react-native-reanimated'
 import { Directions, Gesture, GestureDetector, TouchableOpacity } from 'react-native-gesture-handler'
 
 const {width, height} = Dimensions.get("window")
@@ -40,13 +40,16 @@ const styles = StyleSheet.create({
   }
 })
 
-const TapGesture = ({navigation}) => {
+const TapGesture = () => {
   const [clickedIndex, setClickedIndex] = useState(undefined)
   const storiesInView = useSharedValue(false)
+  const [inView, setInView] = useState(false)
 
   const updateStoriesState = (index) => {
-    setClickedIndex(prev => index)
+    setClickedIndex(index)
     storiesInView.value = !storiesInView.value
+    setInView(prev => true)
+    console.log("clicked index: ", clickedIndex)
   }
 
 
@@ -56,14 +59,14 @@ const TapGesture = ({navigation}) => {
         {scale: withTiming(interpolate(
             storiesInView.value,
             [false, true],
-            [0.7, 1]
+            [0.4, 1]
           ), {duration: 300})
         },
 
         {translateY: withDelay(200, withTiming(interpolate(
           storiesInView.value,
           [false, true],
-          [height, 0]
+          [height * 2, 0]
         ), {duration: 200})) }
       ],
 
@@ -83,15 +86,20 @@ const TapGesture = ({navigation}) => {
         storiesInView.value,
         [false, true],
         ["none", "flex"]
-      )))
+      ))),
     }
   })
 
-  const flingDown = Gesture.Fling().direction(Directions.DOWN)
+  const flingRight = Gesture.Fling().direction(Directions.RIGHT)
     .onStart((_e) => {
       storiesInView.value = false
+      runOnJS(setInView) (false)
       console.log("flung down")
     })
+
+  const Native = Gesture.Native()
+
+  const gesture = Gesture.Exclusive(Native, flingRight)
 
   return (
     <>
@@ -119,14 +127,18 @@ const TapGesture = ({navigation}) => {
         />
         <Text style={{fontSize: 45, color: "#0c0d3466", fontWeight: "900", marginVertical: "auto"}}>Tap Any</Text>
       </View>
-      <GestureDetector gesture={flingDown}>
+      {inView && (
+        <GestureDetector gesture={flingRight}>
         <Animated.View style={[styles.tikreels, storiesPopUpAnimatedStyle]}>
           <TikReels 
             updateStoriesState={updateStoriesState} 
-            clickedIndex={clickedIndex} 
+            clickedIndex={clickedIndex}
+            flingGesture={gesture}
           />
         </Animated.View>
       </GestureDetector>
+      )}
+      
 
     </>
   )

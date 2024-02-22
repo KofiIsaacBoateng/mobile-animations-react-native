@@ -82,7 +82,7 @@ const VideoPlayer = ({
   status,
   setStatus,
   next,
-  back
+  back,
 }) => {
     const isPlaying = status.isPlaying ? true: false
 
@@ -204,6 +204,7 @@ const VideoPlayer = ({
                 }
             }
     })
+    
 
     const tapGestures = Gesture.Exclusive(doubleTap, singleTap)
 
