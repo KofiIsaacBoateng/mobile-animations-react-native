@@ -4,7 +4,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { useNavigation } from '@react-navigation/native'
 import VideoPlayer from './VideoPlayer'
 import ImageDisplay from './ImageDisplay'
 import Profile from './Profile'
@@ -17,6 +16,9 @@ import Animated, {
     useSharedValue, 
     withTiming, 
     Easing,
+    withSpring,
+    withDelay,
+    interpolate,
 } from 'react-native-reanimated'
 
 
@@ -39,10 +41,6 @@ const styles = StyleSheet.create({
         width
     },
     
-    backBtn: {
-       
-    },
-
     statusIndicators: {
         position: "absolute",
         top: 0,
@@ -71,9 +69,8 @@ const styles = StyleSheet.create({
         gap: 5,
         alignItems: "center",
         justifyContent: "space-between",
-        width: width * 0.98,
-        marginLeft: width * 0.01,
-        height: 1.5,
+        height: 1,
+        width,
         alignSelf: "center",
         zIndex: 5
     },
@@ -95,6 +92,7 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStorie
     const vprogress = useSharedValue(0)
     const mprogress = useSharedValue(0)
     const [videoProgress, setVideoProgress] = useState(0) 
+    const muted = useSharedValue(true)
 
     // go to next story 
     const next = () => {
@@ -105,9 +103,9 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStorie
 
     // go to prev story 
     const back = () => {
-        setCurrentIndex(prev => prev <= 0 ? 0 : prev - 1 )
         setVideoProgress(prev => 0)
         vprogress.value = 0
+        setCurrentIndex(prev => prev <= 0 ? 0 : prev - 1 )
     }
 
 
@@ -168,6 +166,30 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStorie
     // global toggle play and pause icon function
     const togglePlayAndPause = (value) => playButtonScale.value = value
 
+    const animatedScaleHigh = useAnimatedStyle(() => ({
+        transform: [
+            {
+                scale: withDelay(300, withSpring(interpolate(
+                    muted.value,
+                    [false, true],
+                    [1, 0]
+                ), {duration: 300}))
+            }
+        ]
+    }))
+
+    const animatedScaleMute = useAnimatedStyle(() => ({
+        transform: [
+            {
+                scale: withDelay(300, withSpring(interpolate(
+                    muted.value,
+                    [true, false],
+                    [1, 0]
+                ), {duration: 300}))
+            }
+        ]
+    }))
+
   return (
     <View style={styles.tik}>
 
@@ -191,17 +213,21 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStorie
                     updateProgressValueToOne={updateProgressValueToOne}
                     next={next}
                     back={back}
+                    muted={muted}
                     profile={<Profile 
                         name={user.name} 
                         username={user.username} 
                         profilePhotoUrl={user.profilePhotoUrl}
                         description={user.stories[currentIndex].storyType}
-                        type="video" 
+                        type="video"
+                        animatedScaleMute={animatedScaleMute}
+                        animatedScaleHigh={animatedScaleHigh}
+                        muted={muted}
                     />}
                 />
-                <View style={[styles.indicatorBackground, styles.videoIndicator, ]}>
-                    <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle, {backgroundColor: "skyBlue"}]} />
-                </View>
+                {/* <View style={[styles.indicatorBackground, styles.videoIndicator, ]}>
+                    <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle, {backgroundColor: "skyblue"}]} />
+                </View> */}
             </>
             ) :
 
@@ -237,12 +263,15 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStorie
 
         {/*** Header is at this position because their zIndex weren't somehow getting shown behind the images and videos */}
         <View style={styles.headerIcons}>
+        <View style={{flexDirection: "column-reverse", gap: 10, alignItems: "center"}}>
             <TouchableOpacity
                 onPress={ () => updateStoriesState(undefined)}
                 style={styles.backBtn}
             >
-                <MaterialIcons name="keyboard-arrow-left"  size={32} color="#fff" />
+                <EvilIcons name="chevron-left"  size={38} color="#fff" />
             </TouchableOpacity>
+        </View>
+
             <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
                 <TouchableOpacity
                     onPress={ () => null}

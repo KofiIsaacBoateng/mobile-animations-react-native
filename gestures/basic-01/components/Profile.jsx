@@ -4,6 +4,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import AntDesign from 'react-native-vector-icons/AntDesign'
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
+
+{/*** animation and gesture imports  */}
+import Animated, {interpolate, withDelay, withSpring} from 'react-native-reanimated'
 
 
 const {width, height} = Dimensions.get("window")
@@ -11,7 +15,7 @@ const styles = StyleSheet.create({
   
   bottom: {
     position: "absolute",
-    bottom: 20,
+    bottom: 0,
     left: 0,
     right: 0,
     height: "auto",
@@ -28,8 +32,27 @@ bottomLeft: {
     paddingVertical: 10,
     borderRadius: 8,
     alignSelf: "flex-end",
-    gap: 5
+    gap: 10
 },
+
+volumeContainer: {
+    // aspectRatio: 1,
+    alignItems: "center",
+    justifyContent: "center"
+},
+
+volume: {
+    position: "absolute",
+    backgroundColor: "#0004",
+    borderWidth: 1,
+    borderRadius: 20,
+    borderColor: "#fff6",
+    width: 30, 
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center"
+},
+
 
 bottomRight: {
     gap: 30,
@@ -72,13 +95,29 @@ reaction: {
 })
 
 
-const Profile = ({name, username, profilePhotoUrl, description, type}) => {
+const Profile = ({muted, username, profilePhotoUrl, description, type, animatedScaleHigh, animatedScaleMute}) => {
+
   return (
       <View style={styles.bottom}>
           {/** username and description */}
           <View style={styles.bottomLeft}>
-              <Text style={{color: "#ffffff", fontSize: 16, letterSpacing: 2, fontWeight: "700"}}>@ {username}</Text>
-              <Text style={{color: "#ffffffd9"}}>Just some random text describing what the update is about. Could be what ...</Text>
+                <View style={{flexDirection: "row", gap: 20, alignItems: "center"}}>
+                    <Text style={{color: "#ffffff", fontSize: 16, letterSpacing: 2, fontWeight: "700"}}>@ {username}</Text>
+                    {type === "video" && (
+                        <TouchableOpacity
+                            onPress={() => muted.value = !muted.value}
+                            style={styles.volumeContainer}
+                        >
+                            <Animated.View style={[styles.volume, animatedScaleHigh]}>
+                                <SimpleLineIcons name="volume-2"  size={18} color="#fff" />
+                            </Animated.View>
+                            <Animated.View style={[styles.volume, animatedScaleMute]}>
+                                <SimpleLineIcons name="volume-off"  size={18} color="#fff" />
+                            </Animated.View>
+                        </TouchableOpacity>
+                    )}
+                </View>
+                <Text style={{color: "#ffffffd9"}}>Just some random text describing what the update is about. Could be what ...</Text>
           </View>
 
           {/** icons and userProfile */}

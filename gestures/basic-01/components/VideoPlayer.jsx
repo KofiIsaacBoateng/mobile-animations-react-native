@@ -83,6 +83,7 @@ const VideoPlayer = ({
   setStatus,
   next,
   back,
+  muted
 }) => {
     const isPlaying = status.isPlaying ? true: false
 
@@ -224,7 +225,7 @@ const VideoPlayer = ({
             style={styles.video}
             resizeMode={ResizeMode.CONTAIN}
             isLooping={true}
-            isMuted={true}
+            isMuted={muted.value}
             progressUpdateIntervalMillis={600}
             onPlaybackStatusUpdate={onPlaybackStatusUpdate}
         />
