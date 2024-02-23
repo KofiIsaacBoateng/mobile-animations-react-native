@@ -115,15 +115,8 @@ const TapGesture = () => {
     }
   })
 
-  const flingRight = Gesture.Fling().direction(Directions.RIGHT)
-    .onStart((_e) => {
-      storiesInView.value = false
-      // runOnJS(setInView) (false)
-      console.log("flung right")
-    })
 
-
-    const flingLeft = Gesture.Fling().direction(Directions.LEFT)
+    const flingRight = Gesture.Fling().direction(Directions.RIGHT)
     .onStart((_e) => {
       storiesInView.value = false
       // runOnJS(setInView) (false)
@@ -131,47 +124,10 @@ const TapGesture = () => {
     })
 
 
-  const drag = Gesture.Pan()
-    .onBegin((_e) => {
-      start.value = {
-        x: _e.translationX,
-        y: _e.translationY
-      }
-    })
 
-    .onUpdate((_e) => {
-      end.value = {
-        x: _e.translationX,
-        y: _e.translationX
-      }
-      scale.value = 1 - ((end.value.x - start.value.x) / 100) * 4
-      console.log(scale.value)
-    })
-    .onEnd((_e) =>{
-        if((end.value.x - start.value.x) < 100){
-          scale.value = 1
-          
-        }else {
-          storiesInView.value = false
-          scale.value = 0
-        }
+  // const flingGestures = Gesture.Simultaneous(flingLeft, flingRight)
 
-        end.value = {
-          x: 0,
-          y: 0
-        }
-        start.value = {
-          x: 0,
-          y: 0
-        }
-    }).minPointers(2)
-
-
-
-
-  const flingGestures = Gesture.Simultaneous(flingLeft, flingRight)
-
-  const gestures = Gesture.Exclusive(flingGestures, drag)
+  // const gestures = Gesture.Exclusive(flingGestures, drag)
 
   return (
     <>
@@ -199,7 +155,7 @@ const TapGesture = () => {
         />
         <Text style={{fontSize: 45, color: "#0c0d3466", fontWeight: "900", marginVertical: "auto"}}>Tap Any</Text>
       </View>
-        <GestureDetector gesture={gestures}>
+        <GestureDetector gesture={flingRight}>
         <Animated.View style={[styles.tikreels, storiesPopUpAnimatedStyle, storiesDragScaleAnimatedStyle]}>
           <TikReels
             updateStoriesState={updateStoriesState}

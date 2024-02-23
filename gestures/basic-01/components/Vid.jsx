@@ -3,13 +3,13 @@ import React, { useEffect, useState, useRef }  from 'react'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import { TouchableOpacity } from 'react-native-gesture-handler'
 import VideoPlayer from './VideoPlayer'
 import ImageDisplay from './ImageDisplay'
 import Profile from './Profile'
 
 
 // gesture and animation imports 
+import { GestureDetector, Gesture, TouchableOpacity, Directions } from 'react-native-gesture-handler'
 import Animated, { 
     runOnJS, 
     useAnimatedStyle, 
@@ -20,6 +20,7 @@ import Animated, {
     withDelay,
     interpolate,
 } from 'react-native-reanimated'
+import UserPage from './UserPage'
 
 
 const {width, height} = Dimensions.get("window")
@@ -81,6 +82,18 @@ const styles = StyleSheet.create({
         backgroundColor: "#fffc"
     },
 
+    userpage: {
+        width,
+        height,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#0c0d34",
+        zIndex: 10,
+        position: "absolute",
+        top: 0,
+        left: 0
+    }
+
 })
 
 const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStoriesState}) => {
@@ -93,6 +106,15 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStorie
     const mprogress = useSharedValue(0)
     const [videoProgress, setVideoProgress] = useState(0) 
     const muted = useSharedValue(true)
+    const userPageInView = useSharedValue(false)
+    const start = useSharedValue({
+        x: 0,
+        y: 0
+    })
+    const end = useSharedValue({
+        x: 0,
+        y: 0
+    })
 
     // go to next story 
     const next = () => {
@@ -190,106 +212,182 @@ const Videos = ({user, activeUserId, currentIndex, setCurrentIndex, updateStorie
         ]
     }))
 
+
+    {/**** gestures and animations */}
+
+    const updatePageAnimatedView = (value) => {
+        userPageInView.value = value
+        console.log(userPageInView.value)
+    }
+
+    {/*** Bring any form or necessary action requited in view */}
+    const drag = Gesture.Pan()
+        .onBegin((_e) => {
+            start.value = {
+            x: _e.translationX,
+            y: _e.translationY
+            }
+        })
+
+        .onUpdate((_e) => {
+            end.value = {
+            x: _e.translationX,
+            y: _e.translationX
+            }
+            // scale.value = 1 - ((end.value.x - start.value.x) / 100) * 4
+            // console.log(scale.value)
+        })
+        .onEnd((_e) =>{
+            if((end.value.x - start.value.x) < 100){
+                // scale.value = 1
+                
+            }else {
+                // storiesInView.value = false
+                // scale.value = 0
+            }
+
+            end.value = {
+                x: 0,
+                y: 0
+            }
+            start.value = {
+                x: 0,
+                y: 0
+            }
+        }).minPointers(2)
+
+    
+    const userPageAnimatedStyle = useAnimatedStyle(() => ({
+        transform: [
+            {translateX: withTiming(interpolate(
+                userPageInView.value,
+                [true, false],
+                [0, height],
+
+            ), {duration: 1000, easing: Easing.linear})}
+        ]
+    }))
+
+    const flingLeft = Gesture.Fling().direction(Directions.LEFT)
+    .onStart((_e) => {
+      {/** bring profile page to view */}
+      runOnJS(updatePageAnimatedView)(true)
+      // runOnJS(setInView) (false)
+      console.log("flung right")
+      console.log(userPageInView.value)
+    })
+
+
   return (
-    <View style={styles.tik}>
+      
+      <View style={styles.tik}>
+            {/** Video Player and Image Display */}
+            <GestureDetector gesture={flingLeft}>
+                <View style={{flex: 1}}>
+                    {user.stories[currentIndex].storyType === "video" ? (
+                        <>
+                            <VideoPlayer 
+                                playerRef={tikRef}
+                                source={user.stories[currentIndex].source}
+                                setStatus={setStatus}
+                                status={status}
+                                isLoading={vidIsLoading}
+                                setIsLoading={setVidIsLoading}
+                                activeUserId={activeUserId}
+                                user={user}
+                                currentIndex={currentIndex}
+                                playButtonScale={playButtonScale}
+                                togglePlayAndPause={togglePlayAndPause}
+                                setVideoProgress={setVideoProgress}
+                                updateProgressValueToOne={updateProgressValueToOne}
+                                next={next}
+                                back={back}
+                                muted={muted}
+                                profile={<Profile 
+                                    name={user.name} 
+                                    username={user.username} 
+                                    profilePhotoUrl={user.profilePhotoUrl}
+                                    description={user.stories[currentIndex].storyType}
+                                    type="video"
+                                    animatedScaleMute={animatedScaleMute}
+                                    animatedScaleHigh={animatedScaleHigh}
+                                    muted={muted}
+                                />}
+                            />
+                            {/* <View style={[styles.indicatorBackground, styles.videoIndicator, ]}>
+                                <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle, {backgroundColor: "skyblue"}]} />
+                            </View> */}
+                        </>
+                        ) :
 
-        {/** Video Player and Image Display */}
-
-        {user.stories[currentIndex].storyType === "video" ? (
-            <>
-                <VideoPlayer 
-                    playerRef={tikRef}
-                    source={user.stories[currentIndex].source}
-                    setStatus={setStatus}
-                    status={status}
-                    isLoading={vidIsLoading}
-                    setIsLoading={setVidIsLoading}
-                    activeUserId={activeUserId}
-                    user={user}
-                    currentIndex={currentIndex}
-                    playButtonScale={playButtonScale}
-                    togglePlayAndPause={togglePlayAndPause}
-                    setVideoProgress={setVideoProgress}
-                    updateProgressValueToOne={updateProgressValueToOne}
-                    next={next}
-                    back={back}
-                    muted={muted}
-                    profile={<Profile 
-                        name={user.name} 
-                        username={user.username} 
-                        profilePhotoUrl={user.profilePhotoUrl}
-                        description={user.stories[currentIndex].storyType}
-                        type="video"
-                        animatedScaleMute={animatedScaleMute}
-                        animatedScaleHigh={animatedScaleHigh}
-                        muted={muted}
-                    />}
-                />
-                {/* <View style={[styles.indicatorBackground, styles.videoIndicator, ]}>
-                    <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle, {backgroundColor: "skyblue"}]} />
-                </View> */}
-            </>
-            ) :
-
-            <ImageDisplay 
-                source={user.stories[currentIndex].source}
-                next={next}
-                back={back}
-                profile={<Profile 
-                    name={user.name} 
-                    username={user.username} 
-                    profilePhotoUrl={user.profilePhotoUrl}
-                    description={user.stories[currentIndex].storyType}
-                    type="image"
-                />}
-            />
-        }
-
-        <View style={styles.statusIndicators} >
-            {user.stories.map((story, index) => (
-                <View key = {`${index}-${story.source}`} style={styles.indicatorBackground}>
-                    {(index < currentIndex) ? (
-                            <View style={[styles.indicator, {width: "100%"}]} />
-                        ): (index > currentIndex) ? (
-                            <View style={[styles.indicator, {width: 0}]} />
-                        ): (
-                            <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle]} />
-                        )
+                        <ImageDisplay 
+                            source={user.stories[currentIndex].source}
+                            next={next}
+                            back={back}
+                            profile={<Profile 
+                                name={user.name} 
+                                username={user.username} 
+                                profilePhotoUrl={user.profilePhotoUrl}
+                                description={user.stories[currentIndex].storyType}
+                                type="image"
+                            />}
+                        />
                     }
 
+                    <View style={styles.statusIndicators} >
+                        {user.stories.map((story, index) => (
+                            <View key = {`${index}-${story.source}`} style={styles.indicatorBackground}>
+                                {(index < currentIndex) ? (
+                                        <View style={[styles.indicator, {width: "100%"}]} />
+                                    ): (index > currentIndex) ? (
+                                        <View style={[styles.indicator, {width: 0}]} />
+                                    ): (
+                                        <Animated.View style={[styles.indicator, statusIndicatorAnimatedStyle]} />
+                                    )
+                                }
+
+                            </View>
+                        ))}
+                    </View>
+
+                    {/*** Header is at this position because their zIndex weren't somehow getting shown behind the images and videos */}
+                    <View style={styles.headerIcons}>
+                    <View style={{flexDirection: "column-reverse", gap: 10, alignItems: "center"}}>
+                        <TouchableOpacity
+                            onPress={ () => updateStoriesState(undefined)}
+                            style={styles.backBtn}
+                        >
+                            <EvilIcons name="chevron-left"  size={38} color="#fff" />
+                        </TouchableOpacity>
+                    </View>
+
+                        <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
+                            <TouchableOpacity
+                                onPress={ () => null}
+                                style={[styles.backBtn, {marginLeft: "auto"}]}
+                            >
+                                <EvilIcons name="search"  size={30} color="#fff" />
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={ () => null}
+                                style={styles.backBtn}
+                            >
+                                <MaterialCommunityIcons name="dots-vertical"  size={27} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
                 </View>
-            ))}
+            </GestureDetector>
+
+            {/*** user page component */}
+            <Animated.View style={[styles.userpage, userPageAnimatedStyle]}>
+                <UserPage 
+                    animatedStyle={userPageAnimatedStyle}
+                    updatePageAnimatedView={updatePageAnimatedView}
+                />
+            </Animated.View>
         </View>
-
-        {/*** Header is at this position because their zIndex weren't somehow getting shown behind the images and videos */}
-        <View style={styles.headerIcons}>
-        <View style={{flexDirection: "column-reverse", gap: 10, alignItems: "center"}}>
-            <TouchableOpacity
-                onPress={ () => updateStoriesState(undefined)}
-                style={styles.backBtn}
-            >
-                <EvilIcons name="chevron-left"  size={38} color="#fff" />
-            </TouchableOpacity>
-        </View>
-
-            <View style={{flexDirection: "row", gap: 10, alignItems: "center"}}>
-                <TouchableOpacity
-                    onPress={ () => null}
-                    style={[styles.backBtn, {marginLeft: "auto"}]}
-                >
-                    <EvilIcons name="search"  size={30} color="#fff" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={ () => null}
-                    style={styles.backBtn}
-                >
-                    <MaterialCommunityIcons name="dots-vertical"  size={27} color="#fff" />
-                </TouchableOpacity>
-            </View>
-        </View>
-
-    </View>
   )
 }
 
